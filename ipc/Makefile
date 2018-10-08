@@ -7,10 +7,21 @@
 # Directories.
 export K1_TOOLCHAIN_DIR = /usr/local/k1tools
 
+# .PHONY: cmd_sync_1
+# .PHONY: cmd_sync_2
+
 # Builds all kernels.
-all:
-	cd sync && $(MAKE) all
-	cp sync/output/bin/*.img $(BINDIR)
+all: cmd_sync_1 cmd_sync_2
+
+# Builds all kernels.
+cmd_sync_1:
+	cd sync_1 && $(MAKE) all
+	cp sync_1/output/bin/*.img $(BINDIR)
+
+# Builds all kernels.
+cmd_sync_2:
+	cd sync_2 && $(MAKE) all
+	cp sync_2/output/bin/*.img $(BINDIR)
 
 # # Builds ipc kernel.
 # sync_test:
