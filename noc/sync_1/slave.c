@@ -12,8 +12,6 @@
 #define MASK_1 0x10
 #define MASK_2 0x20
 
-// static int sync_fd;
-
 int init_sync(int rx_id, int source_cluster, int target_cluster)
 {
     unsigned tx_id = 0;
@@ -48,7 +46,7 @@ int main(__attribute__((unused)) int argc, const char **argv)
 
     int tx_id = init_sync(16, id, 128);
 
-    if (id == '1') //! cluster 1
+    if (id == 1) //! cluster 1
     {
         printf("[IODDR0] Cluster %d: Wait %d\n", id, MASK_0);
         sync(tx_id, MASK_0);

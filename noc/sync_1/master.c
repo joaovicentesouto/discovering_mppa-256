@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdint.h>
+#include <inttypes.h>
 
 #include <mppa_power.h>
 #include <mppa_noc.h>
@@ -41,7 +42,6 @@ void join(void)
 //! SYNC
 
 #define MASK ~0x3F
-// static int sync_fd;
 
 void init_sync(int rx_id)
 {
@@ -57,8 +57,8 @@ void init_sync(int rx_id)
 
     //! Configuration
     mppa_noc_cnoc_rx_configuration_t config = { 0 };
-    config.mode = MPPA_NOC_CNOC_RX_MAILBOX;
-    config.init_value = ~0x3F;
+    config.mode = MPPA_NOC_CNOC_RX_BARRIER;
+    config.init_value = MASK;
 
     assert(mppa_noc_cnoc_rx_configure(0, rx_id, config, &notif) == 0);
 }
