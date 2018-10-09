@@ -3,7 +3,7 @@
 #
 
 # Executable.
-EXEC = sync_2_exec
+EXEC = sync_exec
 
 # Sets the target platform.
 platforms := hardware

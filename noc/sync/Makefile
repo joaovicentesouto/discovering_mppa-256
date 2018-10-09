@@ -3,7 +3,7 @@
 #
 
 # Executable.
-EXEC = sync_1_exec
+EXEC = sync_exec
 
 # Use bare libraries
 system-name := bare
