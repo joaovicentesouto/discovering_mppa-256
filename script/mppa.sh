@@ -18,7 +18,7 @@ fi
 if [ "$1" = "ipc" ];
 then
 	echo "  ========== IPC MODE ==========  "
-	for kernel in sync_exec;
+	for kernel in sync_exec sync_exec_2;
 	do
 		echo "  ========== Running SYNC Kernel ==========  "
 		$K1DIR/k1-jtag-runner                               \
@@ -28,7 +28,7 @@ then
 elif [ "$1" = "noc" ];
 then
 	echo "  ========== NOC MODE ==========  "
-	for kernel in sync_exec;
+	for kernel in sync_exec_2;
 	do
 		echo "  ========== Running SYNC Kernel ==========  "
 		$K1DIR/k1-jtag-runner                               \

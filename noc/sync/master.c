@@ -1,5 +1,5 @@
 
-#include <mppaipc.h>
+// #include <mppaipc.h>
 #include <mppa/osconfig.h>
 #include <stdio.h>
 #include <assert.h>
@@ -13,7 +13,7 @@
 //! SPAWN
 
 #define NUM_CLUSTERS 16
-static mppa_pid_t pids[NUM_CLUSTERS];
+static mppa_power_pid_t pids[NUM_CLUSTERS];
 
 void spawn(void)
 {

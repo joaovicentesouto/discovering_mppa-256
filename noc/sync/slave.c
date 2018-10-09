@@ -34,7 +34,7 @@ void sync(int tx_id, uint64_t mask)
 
 void end_sync(int tx_id)
 {
-    mppa_noc_cnoc_rx_free(0, tx_id);
+    mppa_noc_cnoc_tx_free(0, tx_id);
 }
 
 int main(__attribute__((unused)) int argc, const char **argv)
