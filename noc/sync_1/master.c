@@ -41,27 +41,52 @@ void join(void)
 //! SYNC
 
 #define MASK ~0x3F
-static int sync_fd;
+// static int sync_fd;
 
-void init_sync(uint64_t mask)
+void init_sync(int rx_id)
 {
-    char pathname[128];
-    sprintf(pathname, "/mppa/sync/128:16");
-    sync_fd = mppa_open(pathname, O_RDONLY);
-    assert(sync_fd != -1);
+    //! Alloc rx buffer
+    assert(mppa_noc_cnoc_rx_alloc(0, rx_id) == 0);
+    
+    //! Notification
+    mppa_cnoc_mailbox_notif_t notif;
+    memset(&notif, 0, sizeof(mppa_cnoc_mailbox_notif_t));
+    notif._.enable = 1;
+    notif._.evt_en = 1;
+    notif._.rm = 1 << __k1_get_cpu_id();
 
-    mppa_ioctl(sync_fd, MPPA_RX_SET_MATCH, mask);
+    //! Configuration
+    mppa_noc_cnoc_rx_configuration_t config = { 0 };
+    config.mode = MPPA_NOC_CNOC_RX_MAILBOX;
+    config.init_value = ~0x3F;
+
+    assert(mppa_noc_cnoc_rx_configure(0, rx_id, config, &notif) == 0);
 }
 
-void sync()
+void sync(int rx_id)
 {
-    uint64_t value;
-    mppa_read(sync_fd, &value, sizeof(value));
+    mppa_noc_wait_clear_event(0, MPPA_NOC_INTERRUPT_LINE_CNOC_RX, rx_id);
+
+    //! Retrigger
+
+    //! Notification
+    mppa_cnoc_mailbox_notif_t notif;
+    memset(&notif, 0, sizeof(mppa_cnoc_mailbox_notif_t));
+    notif._.enable = 1;
+    notif._.evt_en = 1;
+    notif._.rm = 1 << __k1_get_cpu_id();
+
+    //! Configuration
+    mppa_noc_cnoc_rx_configuration_t config = { 0 };
+    config.mode = MPPA_NOC_CNOC_RX_MAILBOX;
+    config.init_value = ~0x3F;
+
+    assert(mppa_noc_cnoc_rx_configure(0, rx_id, config, &notif) == 0);
 }
 
-void end_sync(void)
+void end_sync(int rx_id)
 {
-    mppa_close(sync_fd);
+    mppa_noc_cnoc_rx_free(0, rx_id);
 }
 
 //! MAIN
@@ -70,17 +95,17 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
 {
     printf("[IODDR0] MASTER: Start sync\n");
 
-    init_sync(MASK);
+    init_sync(16);
 
     spawn();
 
 	printf("[IODDR0] MASTER: Wait\n");
 
-    sync();
+    sync(16);
     
     printf("[IODDR0] MASTER: Sync\n");
 
-    end_sync();
+    end_sync(16);
 
     printf("[IODDR0] MASTER: End Sync\n");
 
