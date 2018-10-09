@@ -3,7 +3,6 @@
 #include <mppa/osconfig.h>
 #include <stdio.h>
 #include <assert.h>
-#include <stdint.h>
 
 #define NUM_CLUSTERS 16
 static mppa_pid_t pids[NUM_CLUSTERS];
