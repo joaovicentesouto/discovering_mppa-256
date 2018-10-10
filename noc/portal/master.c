@@ -33,26 +33,41 @@ void join()
 }
 
 #define MASK ~0x3F
-static int portal_fd;
+static int rx_tag = 7;
 static mppa_aiocb_t aiocb;
 
 void portal_open()
 {
-    char pathname[128];
-    sprintf(pathname, "/mppa/portal/128:7");
-    portal_fd = mppa_open(pathname, O_RDONLY);
-    assert(portal_fd != -1);
+    assert(mppa_noc_dnoc_rx_alloc(0, rx_tag) == MPPA_NOC_RET_SUCCESS);
 }
 
-void portal_aio_read(char * buffer, int size)
+void portal_aio_read(char * buffer, int size, int offset)
 {
-    mppa_aiocb_ctor(&aiocb, portal_fd, buffer, size);
-	assert(mppa_aio_read(&aiocb) != -1);
+    mppa_noc_dnoc_rx_configuration_t rx_configuration = {
+        .buffer_base = buffer,
+        .buffer_size = size,
+        .current_offset = offset,
+        .item_reload = 0,
+        .item_counter = 0,
+        .event_counter = 0,
+        .reload_mode = MPPA_NOC_RX_RELOAD_MODE_INCR_DATA_NOTIF,
+        .activation = MPPA_NOC_ACTIVATED,
+        .counter_id = 0
+    };
+
+    assert(mppa_noc_dnoc_rx_configure(0, rx_tag, rx_configuration) == 0);
+
+    mppa_noc_dnoc_rx_lac_event_counter(0, rx_tag);
 }
 
 void portal_aio_wait()
 {
-    mppa_aio_wait(&aiocb);
+    int value = 0;
+    while(value == 0)
+        value = mppa_noc_dnoc_rx_get_event_counter(0, rx_tag);
+
+    mppa_noc_dnoc_rx_lac_event_counter(0, rx_tag);
+    mppa_noc_dnoc_rx_lac_item_counter(0, rx_tag);
 }
 
 void portal_close(void)
