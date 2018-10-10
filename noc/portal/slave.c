@@ -36,11 +36,11 @@ void portal_write(char *buffer, int size, int offset)
 {
     mppa_dnoc_push_offset_t off;
     off._.offset = offset;
-    off._.protocol = 0x1; //! absolute
+    off._.protocol = 0x1; //! absolute offset
     off._.valid = 1;
 
-    mppa_noc_dnoc_tx_flush(0, portal_tx); //! need?
-    __builtin_k1_fence();
+    // mppa_noc_dnoc_tx_flush(0, portal_tx); //! need?
+    // __builtin_k1_fence();
     mppa_noc_dnoc_tx_set_push_offset(0, portal_tx, off);
     mppa_noc_dnoc_tx_send_data(0, portal_tx, size, buffer);
     mppa_noc_dnoc_tx_flush_eot(0, portal_tx);
@@ -51,10 +51,9 @@ void portal_close(void)
     mppa_noc_dnoc_tx_free(0, portal_tx);
 }
 
-int main(__attribute__((unused)) int argc, const char **argv)
+int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
 {
     int id = __k1_get_cluster_id();
-    // char id = atoi(argv[0]);
 
     printf("[IODDR0] Cluster %d: Start portal\n", id);
 
