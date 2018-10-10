@@ -8,7 +8,7 @@
 export K1_TOOLCHAIN_DIR = /usr/local/k1tools
 
 # Builds all kernels.
-all: cmd_portal # cmd_sync cmd_sync_2
+all: cmd_mailbox # cmd_sync cmd_sync_2
 
 # Builds sync kernel.
 cmd_sync:
@@ -30,8 +30,14 @@ cmd_portal:
 	cd portal_2 && $(MAKE) all
 	cp portal_2/output/bin/*.img $(BINDIR)
 
+# Builds mailbox kernel.
+cmd_mailbox:
+	cd mailbox && $(MAKE) all
+	cp mailbox/output/bin/*.img $(BINDIR)
+
 clean:
 	rm -rf sync/output
 	rm -rf sync_2/output
 	rm -rf portal/output
 	rm -rf portal_2/output
+	rm -rf mailbox/output
