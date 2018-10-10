@@ -25,7 +25,13 @@ cmd_portal:
 	cd portal && $(MAKE) all
 	cp portal/output/bin/*.img $(BINDIR)
 
+# Builds another portal kernel.
+cmd_portal:
+	cd portal_2 && $(MAKE) all
+	cp portal_2/output/bin/*.img $(BINDIR)
+
 clean:
 	rm -rf sync/output
 	rm -rf sync_2/output
 	rm -rf portal/output
+	rm -rf portal_2/output
