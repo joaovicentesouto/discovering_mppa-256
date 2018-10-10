@@ -1,12 +1,18 @@
-
-#include <mppaipc.h>
+// #include <mppaipc.h>
 #include <mppa/osconfig.h>
 #include <stdio.h>
 #include <assert.h>
 #include <stdint.h>
+#include <inttypes.h>
+
+#include <mppa_power.h>
+#include <mppa_noc.h>
+#include <mppa_routing.h>
+
+//! SPAWN
 
 #define NUM_CLUSTERS 16
-static mppa_pid_t pids[NUM_CLUSTERS];
+static mppa_power_pid_t pids[NUM_CLUSTERS];
 
 void spawn(void)
 {
@@ -20,25 +26,25 @@ void spawn(void)
 	{	
 		sprintf(arg0, "%d", i);
 		args[0] = arg0;
-		pids[i] = mppa_spawn(i, NULL, "slave", (const char **)args, NULL);
+		pids[i] = mppa_power_base_spawn(i, "cluster_bin", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
 		assert(pids[i] != -1);
 	}
 }
 
-void join()
+void join(void)
 {
-    int i;
+    int i, ret;
 	for (i = 1; i < 3; i++)
-		mppa_waitpid(pids[i], NULL, 0);
+		mppa_power_base_waitpid(i, &ret, 0);
 }
 
-#define MASK ~0x3F
-static int rx_tag = 7;
-static mppa_aiocb_t aiocb;
+//! PORTAL
+
+static int portal_rx = 7;
 
 void portal_open()
 {
-    assert(mppa_noc_dnoc_rx_alloc(0, rx_tag) == MPPA_NOC_RET_SUCCESS);
+    assert(mppa_noc_dnoc_rx_alloc(0, portal_rx) == MPPA_NOC_RET_SUCCESS);
 }
 
 void portal_aio_read(char * buffer, int size, int offset)
@@ -55,24 +61,29 @@ void portal_aio_read(char * buffer, int size, int offset)
         .counter_id = 0
     };
 
-    assert(mppa_noc_dnoc_rx_configure(0, rx_tag, rx_configuration) == 0);
+    assert(mppa_noc_dnoc_rx_configure(0, portal_rx, rx_configuration) == 0);
 
-    mppa_noc_dnoc_rx_lac_event_counter(0, rx_tag);
+    mppa_noc_dnoc_rx_lac_event_counter(0, portal_rx);
 }
 
 void portal_aio_wait()
 {
-    int value = 0;
-    while(value == 0)
-        value = mppa_noc_dnoc_rx_get_event_counter(0, rx_tag);
+    int event = 0, item = 0;
+    while(event == 0 || item < 11)
+    {
+        event = mppa_noc_dnoc_rx_get_event_counter(0, portal_rx);
+        item = mppa_noc_dnoc_rx_get_item_counter(0, portal_rx);
+    }
 
-    mppa_noc_dnoc_rx_lac_event_counter(0, rx_tag);
-    mppa_noc_dnoc_rx_lac_item_counter(0, rx_tag);
+    printf("[IODDR0] MASTER: item: %d - event: %d\n", item, event);
+
+    mppa_noc_dnoc_rx_lac_event_counter(0, portal_rx);
+    mppa_noc_dnoc_rx_lac_item_counter(0, portal_rx);
 }
 
 void portal_close(void)
 {
-    mppa_close(portal_fd);
+    mppa_noc_dnoc_rx_free(0, portal_rx);
 }
 
 int main(__attribute__((unused)) int argc, const char **argv)
@@ -84,7 +95,7 @@ int main(__attribute__((unused)) int argc, const char **argv)
 
     portal_open();
 
-    portal_aio_read(buffer, 11);
+    portal_aio_read(buffer, 11, 0);
 
     spawn();
 

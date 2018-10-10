@@ -28,7 +28,7 @@ then
 elif [ "$1" = "noc" ];
 then
 	echo "  ========== NOC MODE ==========  "
-	for kernel in sync_exec_2;
+	for kernel in portal_exec;
 	do
 		echo "  ========== Running SYNC Kernel ==========  "
 		$K1DIR/k1-jtag-runner                               \
