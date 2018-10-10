@@ -8,15 +8,16 @@ export BINDIR  = $(CURDIR)/bin
 
 # Builds all kernels for MPPA-256.
 all-ipc: 
-	mkdir -p bin
+	mkdir -p $(BINDIR)
 	cd ipc && $(MAKE) all BINDIR=$(BINDIR)
 
 # Builds all kernels for MPPA-256.
 all-noc: 
-	mkdir -p bin
+	mkdir -p $(BINDIR)
 	cd noc && $(MAKE) all BINDIR=$(BINDIR)
 
 # Cleans compilation files.
 clean:
-	cd ipc && $(MAKE) clean BINDIR=$(BINDIR)
-	cd noc && $(MAKE) clean BINDIR=$(BINDIR)
+	rm -rf $(BINDIR)
+	cd ipc && $(MAKE) clean
+	cd noc && $(MAKE) clean

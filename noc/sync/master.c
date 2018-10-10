@@ -78,7 +78,7 @@ void sync(int rx_id)
 
     //! Configuration
     mppa_noc_cnoc_rx_configuration_t config = { 0 };
-    config.mode = MPPA_NOC_CNOC_RX_MAILBOX;
+    config.mode = MPPA_NOC_CNOC_RX_BARRIER;
     config.init_value = ~0x3F;
 
     assert(mppa_noc_cnoc_rx_configure(0, rx_id, config, &notif) == 0);
