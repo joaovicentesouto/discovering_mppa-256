@@ -15,6 +15,40 @@
 
 static int portal_tx;
 
+void portal_open(int source_cluster, int target_cluster);
+void portal_write(char *buffer, int size, int offset);
+void portal_close(void);
+
+int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
+{
+    int id = __k1_get_cluster_id();
+
+        printf("Open portal\n");
+
+    portal_open(id, 128);
+
+        printf("Send\n");
+
+    if (id == 1)
+    {
+        char buffer[4];
+        sprintf(buffer, "C1& ");
+        portal_write(buffer, 4, 0);
+    }
+    else
+    {
+        char buffer[7];
+        sprintf(buffer, " Clus2");
+        portal_write(buffer, 7, 4);
+    }
+
+    portal_close();
+
+	    printf("Goodbye\n");
+
+	return 0;
+}
+
 void portal_open(int source_cluster, int target_cluster)
 {
     unsigned aux;
@@ -49,37 +83,4 @@ void portal_write(char *buffer, int size, int offset)
 void portal_close(void)
 {
     mppa_noc_dnoc_tx_free(0, portal_tx);
-}
-
-int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
-{
-    int id = __k1_get_cluster_id();
-
-    printf("Start portal\n");
-
-    portal_open(id, 128);
-
-    printf("send\n");
-
-    if (id == 1)
-    {
-        char buffer[4];
-        sprintf(buffer, "C1& ");
-        portal_write(buffer, 4, 0);
-    }
-    else
-    {
-        char buffer[7];
-        sprintf(buffer, " Clus2");
-        portal_write(buffer, 7, 4);
-    }
-    
-    printf("Sync\n");
-
-    portal_close();
-
-    printf("End Sync\n");
-	printf("Goodbye\n");
-
-	return 0;
 }

@@ -9,40 +9,50 @@
 #include <mppa_noc.h>
 #include <mppa_routing.h>
 
-//! SPAWN
-
+//! Spawn section
 #define NUM_CLUSTERS 16
 static mppa_power_pid_t pids[NUM_CLUSTERS];
 
-void spawn(void)
-{
-    int i;
-	char arg0[4];
-	char *args[2];
+void spawn(void);
+void join(void);
 
-	/* Spawn slaves. */
-	args[1] = NULL;
-	for (i = 1; i < 3; i++)
-	{	
-		sprintf(arg0, "%d", i);
-		args[0] = arg0;
-		pids[i] = mppa_power_base_spawn(i, "slave", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
-		assert(pids[i] != -1);
-	}
-}
-
-void join(void)
-{
-    int i, ret;
-	for (i = 1; i < 3; i++)
-		mppa_power_base_waitpid(i, &ret, 0);
-}
-
-//! SYNC
-
+//! Sync section
 #define MASK ~0x3
 static int sync_in;
 static int sync_out;
+
+void init_sync(void);
+void mppa_wait(void);
+void mppa_signal(void);
+void end_sync(void);
+
+int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **argv)
+{
+        printf(" ====== NoC: Sync 2 ======\n");
+        printf(" Open Sync\n");
+
+    init_sync();
+    spawn();
+
+	    printf("Wait\n");
+
+    mppa_wait();
+    
+        printf("Sync\n");
+
+    mppa_signal();
+    end_sync();
+
+        printf("Join\n");
+
+    join();
+
+        printf("Goodbye\n");
+
+	return 0;
+};
+
+// ====== Sync functions ======
 
 void init_sync(void)
 {   
@@ -141,35 +151,30 @@ void end_sync(void)
 {
     mppa_noc_cnoc_rx_free(0, sync_in);
     mppa_noc_cnoc_tx_free(0, sync_out);
-    
 }
 
-int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **argv)
+// ====== Spawn functions ======
+
+void spawn(void)
 {
-    printf("Start sync\n");
+    int i;
+	char arg0[4];
+	char *args[2];
 
-    init_sync();
+	/* Spawn slaves. */
+	args[1] = NULL;
+	for (i = 1; i < 3; i++)
+	{	
+		sprintf(arg0, "%d", i);
+		args[0] = arg0;
+		pids[i] = mppa_power_base_spawn(i, "slave", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
+		assert(pids[i] != -1);
+	}
+}
 
-    spawn();
-
-	printf("Wait\n");
-
-    mppa_wait();
-    
-    printf("Sync\n");
-
-
-    // while(true);
-
-    mppa_signal();
-
-    printf("End Sync\n");
-
-    end_sync();
-
-    join();
-
-    printf("Goodbye\n");
-
-	return 0;
-};
+void join(void)
+{
+    int i, ret;
+	for (i = 1; i < 3; i++)
+		mppa_power_base_waitpid(i, &ret, 0);
+}

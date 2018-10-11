@@ -9,39 +9,59 @@
 #include <mppa_noc.h>
 #include <mppa_routing.h>
 
-//! SPAWN
-
+//! Spawn section
 #define NUM_CLUSTERS 16
 static mppa_power_pid_t pids[NUM_CLUSTERS];
 
-void spawn(void)
-{
-    int i;
-	char arg0[4];
-	char *args[2];
+void spawn(void);
+void join(void);
 
-	/* Spawn slaves. */
-	args[1] = NULL;
-	for (i = 1; i < 3; i++)
-	{	
-		sprintf(arg0, "%d", i);
-		args[0] = arg0;
-		pids[i] = mppa_power_base_spawn(i, "slave", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
-		assert(pids[i] != -1);
-	}
-}
-
-void join(void)
-{
-    int i, ret;
-	for (i = 1; i < 3; i++)
-		mppa_power_base_waitpid(i, &ret, 0);
-}
-
+//! Portal section
 #define MASK ~0x3
 static int portal_tx, sync_rx;
 
-void portal_open()
+void portal_open(void);
+void portal_wait(void);
+void portal_write(int target_cluster, char * buffer, int size, int offset);
+void portal_close(void);
+
+int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
+{
+    char buff_1[4];
+    char buff_2[7];
+
+        printf(" ====== NoC: Portal 2 ======\n");
+        printf(" Open Portals\n");
+
+    portal_open();
+    spawn();
+
+	    printf("Wait signal\n");
+
+    portal_wait();
+    
+        printf("Send\n");
+
+    sprintf(buff_1, "C_1\0");
+    portal_write(1, buff_1, 4, 0);
+
+    sprintf(buff_2, "C____2\0");
+    portal_write(2, buff_2, 7, 0);
+
+    portal_close();
+
+        printf("Join\n");
+
+    join();
+
+        printf("Goodbye\n");
+
+	return 0;
+};
+
+// ====== Portal functions ======
+
+void portal_open(void)
 {
     //! portal
     unsigned aux;
@@ -66,7 +86,7 @@ void portal_open()
     assert(mppa_noc_cnoc_rx_configure(0, sync_rx, config, &notif) == 0);
 }
 
-void portal_wait()
+void portal_wait(void)
 {
     mppa_noc_wait_clear_event(0, MPPA_NOC_INTERRUPT_LINE_CNOC_RX, sync_rx);
 }
@@ -109,35 +129,28 @@ void portal_close(void)
     mppa_noc_dnoc_rx_free(0, sync_rx);
 }
 
-int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
+// ====== Spawn functions ======
+
+void spawn(void)
 {
-    printf("Start portal\n");
+    int i;
+	char arg0[4];
+	char *args[2];
 
-    portal_open();
+	/* Spawn slaves. */
+	args[1] = NULL;
+	for (i = 1; i < 3; i++)
+	{	
+		sprintf(arg0, "%d", i);
+		args[0] = arg0;
+		pids[i] = mppa_power_base_spawn(i, "slave", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
+		assert(pids[i] != -1);
+	}
+}
 
-    spawn();
-
-	printf("Wait\n");
-
-    portal_wait();
-    
-    printf("send\n");
-
-    char buff_1[4];
-    sprintf(buff_1, "C_1\0");
-    portal_write(1, buff_1, 4, 0);
-
-    char buff_2[7];
-    sprintf(buff_2, "C_____2");
-    portal_write(2, buff_2, 7, 0);
-
-
-    printf("End portal\n");
-
-    portal_close();
-    join();
-
-    printf("Goodbye\n");
-
-	return 0;
-};
+void join(void)
+{
+    int i, ret;
+	for (i = 1; i < 3; i++)
+		mppa_power_base_waitpid(i, &ret, 0);
+}

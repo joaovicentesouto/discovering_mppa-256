@@ -8,11 +8,40 @@
 #include <mppa_noc.h>
 #include <mppa_routing.h>
 
-//! SYNC
+//! Sync section
 
 #define MASK ~0x0
 static int sync_in;
 static int sync_out;
+
+void init_sync(int source_cluster);
+void mppa_wait(void);
+void mppa_signal(uint64_t value);
+void end_sync(void);
+
+int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
+{
+    int id = __k1_get_cluster_id();
+
+        printf("Start sync\n");
+
+    init_sync(id);
+    
+        printf("Sync\n");
+
+    uint64_t value = 1 << (id == 1 ? 0 : 1);
+
+    mppa_signal(value);
+
+        printf("Signal %jx\n", value);
+
+    mppa_wait();
+    end_sync();
+
+	    printf("Goodbye\n");
+
+	return 0;
+}
 
 void init_sync(int source_cluster)
 {
@@ -84,34 +113,4 @@ void end_sync(void)
 {
     mppa_noc_cnoc_rx_free(0, sync_in);
     mppa_noc_cnoc_tx_free(0, sync_out);
-}
-
-int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
-{
-    int id = __k1_get_cluster_id();
-    // int id = atoi(argv[0]);
-
-    printf("Start sync\n");
-
-    init_sync(id);
-    
-    printf("Sync\n");
-
-    uint64_t value = 1 << (id == 1 ? 0 : 1);
-
-    mppa_signal(value);
-
-    printf("Wait %jx\n", value);
-
-    // while(true);
-
-    mppa_wait();
-
-    printf("End Sync\n");
-
-    end_sync();
-
-	printf("Goodbye\n");
-
-	return 0;
 }

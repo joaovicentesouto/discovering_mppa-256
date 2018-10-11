@@ -15,6 +15,41 @@
 
 static int portal_rx, sync_tx;
 
+void portal_open(int source_cluster);
+void portal_signal(uint64_t mask);
+void portal_read(char * buffer, int size, int offset);
+void portal_wait();
+void portal_close(void);
+
+int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
+{
+    int id = __k1_get_cluster_id();
+    int offset = id == 1 ? 0 : 1;
+    int buffer_size = id == 1 ? 4 : 7;
+
+        printf("Open portal\n");
+
+    portal_open(id);
+
+        printf("Signal\n");
+
+    portal_signal(1 << offset);
+    
+        printf("Recive Msg\n");
+
+    char buffer[buffer_size];
+    portal_read(buffer, buffer_size, 0);
+    portal_wait();
+    
+        printf("Msg: %s\n", buffer);
+
+    portal_close();
+
+	    printf("Goodbye\n");
+
+	return 0;
+}
+
 void portal_open(int source_cluster)
 {
     //! Portal
@@ -78,36 +113,4 @@ void portal_close(void)
 {
     mppa_noc_dnoc_rx_free(0, portal_rx);
     mppa_noc_dnoc_tx_free(0, sync_tx);
-}
-
-int main(__attribute__((unused)) int argc, const char **argv)
-{
-    // int id = __k1_get_cluster_id();
-    int id = atoi(argv[0]);
-    int offset = id == 1 ? 0 : 1;
-    int buffer_size = id == 1 ? 4 : 7;
-
-    printf("Start portal\n");
-
-    portal_open(id);
-
-    printf("send\n");
-
-    portal_signal(1 << offset);
-    
-    printf("Sync\n");
-
-    char buffer[buffer_size];
-    portal_read(buffer, buffer_size, 0);
-    portal_wait();
-    
-    printf("B: %s\n", buffer);
-
-    printf("End Sync\n");
-
-    portal_close();
-
-	printf("Goodbye\n");
-
-	return 0;
 }

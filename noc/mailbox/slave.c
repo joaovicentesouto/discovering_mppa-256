@@ -12,6 +12,28 @@
 
 static int mailbox_tx;
 
+void init(int tag_rx, int source_cluster, int target_cluster);
+void send_mailbox(uint64_t mask);
+void end();
+
+int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
+{
+    int id = __k1_get_cluster_id();
+
+        printf("Start sync\n");
+
+    init(16, id, 128);
+
+        printf("Send mailbox: %jx\n", (uint64_t) MASK);
+    
+    send_mailbox(MASK);
+    end();
+
+	    printf("Goodbye\n");
+
+	return 0;
+}
+
 void init(int tag_rx, int source_cluster, int target_cluster)
 {
     unsigned tag_tx = 0;
@@ -35,25 +57,4 @@ void send_mailbox(uint64_t mask)
 void end()
 {
     mppa_noc_cnoc_tx_free(0, mailbox_tx);
-}
-
-int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
-{
-    int id = __k1_get_cluster_id();
-
-    printf("Start sync\n");
-
-    init(16, id, 128);
-
-    printf("Send mailbox: %jx\n", (uint64_t) MASK);
-    
-    send_mailbox(MASK);
-    
-    printf("End Sync\n");
-
-    end();
-
-	printf("Goodbye\n");
-
-	return 0;
 }
