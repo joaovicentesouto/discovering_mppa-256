@@ -55,11 +55,11 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 {
     int id = __k1_get_cluster_id();
 
-    printf("[IODDR0] Cluster %d: Start portal\n", id);
+    printf("Start portal\n");
 
     portal_open(id, 128);
 
-    printf("[IODDR0] Cluster %d: send\n", id);
+    printf("send\n");
 
     if (id == 1)
     {
@@ -74,12 +74,12 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
         portal_write(buffer, 7, 4);
     }
     
-    printf("[IODDR0] Cluster %d: Sync\n", id);
+    printf("Sync\n");
 
     portal_close();
 
-    printf("[IODDR0] Cluster %d: End Sync\n", id);
-	printf("[IODDR0] Cluster %d: Goodbye\n", id);
+    printf("End Sync\n");
+	printf("Goodbye\n");
 
 	return 0;
 }

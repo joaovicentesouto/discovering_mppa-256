@@ -25,7 +25,7 @@ void spawn(void)
 	{	
 		sprintf(arg0, "%d", i);
 		args[0] = arg0;
-		pids[i] = mppa_power_base_spawn(i, "cluster_bin", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
+		pids[i] = mppa_power_base_spawn(i, "slave", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
 		assert(pids[i] != -1);
 	}
 }
@@ -90,7 +90,7 @@ void end()
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **argv)
 {
-    printf("[IODDR0] MASTER: Start sync\n");
+    printf("Start sync\n");
 
     mailbox_rx = 16;
 
@@ -98,20 +98,20 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
 
     spawn();
     
-    printf("[IODDR0] MASTER: Recive mailbox\n");
+    printf("Recive mailbox\n");
 
     uint64_t mailbox;
     recive_mailbox(&mailbox);
 
-    printf("[IODDR0] MASTER: Msg: %jx\n", mailbox);
+    printf("Msg: %jx\n", mailbox);
 
     end();
 
-    printf("[IODDR0] MASTER: End Sync\n");
+    printf("End Sync\n");
 
     join();
 
-    printf("[IODDR0] Goodbye\n");
+    printf("Goodbye\n");
 
 	return 0;
 };

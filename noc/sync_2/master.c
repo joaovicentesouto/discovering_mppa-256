@@ -26,7 +26,7 @@ void spawn(void)
 	{	
 		sprintf(arg0, "%d", i);
 		args[0] = arg0;
-		pids[i] = mppa_power_base_spawn(i, "cluster_bin", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
+		pids[i] = mppa_power_base_spawn(i, "slave", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
 		assert(pids[i] != -1);
 	}
 }
@@ -146,30 +146,30 @@ void end_sync(void)
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **argv)
 {
-    printf("[IODDR0] MASTER: Start sync\n");
+    printf("Start sync\n");
 
     init_sync();
 
     spawn();
 
-	printf("[IODDR0] MASTER: Wait\n");
+	printf("Wait\n");
 
     mppa_wait();
     
-    printf("[IODDR0] MASTER: Sync\n");
+    printf("Sync\n");
 
 
     // while(true);
 
     mppa_signal();
 
-    printf("[IODDR0] MASTER: End Sync\n");
+    printf("End Sync\n");
 
     end_sync();
 
     join();
 
-    printf("[IODDR0] Goodbye\n");
+    printf("Goodbye\n");
 
 	return 0;
 };

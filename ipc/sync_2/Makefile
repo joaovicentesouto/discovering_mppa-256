@@ -3,7 +3,7 @@
 #
 
 # Executable.
-EXEC = sync_exec_2
+EXEC = sync_2_exec
 
 # Sets the target platform.
 platforms := hardware
@@ -16,7 +16,7 @@ k1-lflags := -lmppaipc
 # Builds master binary.
 io-bin := master
 master-cflags := -mos=rtems
-master-srcs := master.c
+master-srcs :=  master.c
 
 # Builds slave binary
 cluster-bin := slave

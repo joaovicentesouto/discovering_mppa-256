@@ -10,33 +10,19 @@
 
 static int portal_fd;
 
-void portal_open(void)
-{
-    char pathname[128] = "/mppa/portal/128:7";
-    portal_fd = mppa_open(pathname, O_WRONLY);
-    assert(portal_fd != -1);
-}
-
-void portal_write(char *buffer, int size, int offset)
-{
-    mppa_pwrite(portal_fd, buffer, size, offset);
-}
-
-void portal_close(void)
-{
-    mppa_close(portal_fd);
-}
+void portal_open(void);
+void portal_close(void);
+void portal_write(char *buffer, int size, int offset);
 
 int main(__attribute__((unused)) int argc, const char **argv)
 {
-    // int id = __k1_get_cluster_id();
-    char id = atoi(argv[0]);
+    int id = atoi(argv[0]);
 
-    printf("[IODDR0] Cluster %d: Start portal\n", id);
+        printf("C%d, Start portal\n", id);
 
     portal_open();
 
-    printf("[IODDR0] Cluster %d: send\n", id);
+        printf("C%d, Send\n", id);
 
     if (id == 1)
     {
@@ -51,12 +37,28 @@ int main(__attribute__((unused)) int argc, const char **argv)
         portal_write(buffer, 7, 4);
     }
     
-    printf("[IODDR0] Cluster %d: Sync\n", id);
+        printf("C%d, Sync\n", id);
 
     portal_close();
 
-    printf("[IODDR0] Cluster %d: End Sync\n", id);
-	printf("[IODDR0] Cluster %d: Goodbye\n", id);
+	    printf("C%d, Goodbye\n", id);
 
 	return 0;
+}
+
+void portal_open(void)
+{
+    char pathname[128] = "/mppa/portal/128:7";
+    portal_fd = mppa_open(pathname, O_WRONLY);
+    assert(portal_fd != -1);
+}
+
+void portal_close(void)
+{
+    mppa_close(portal_fd);
+}
+
+void portal_write(char *buffer, int size, int offset)
+{
+    mppa_pwrite(portal_fd, buffer, size, offset);
 }

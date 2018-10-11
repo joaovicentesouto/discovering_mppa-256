@@ -26,7 +26,7 @@ void spawn(void)
 	{	
 		sprintf(arg0, "%d", i);
 		args[0] = arg0;
-		pids[i] = mppa_power_base_spawn(i, "cluster_bin", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
+		pids[i] = mppa_power_base_spawn(i, "slave", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
 		assert(pids[i] != -1);
 	}
 }
@@ -111,17 +111,17 @@ void portal_close(void)
 
 int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
 {
-    printf("[IODDR0] MASTER: Start portal\n");
+    printf("Start portal\n");
 
     portal_open();
 
     spawn();
 
-	printf("[IODDR0] MASTER: Wait\n");
+	printf("Wait\n");
 
     portal_wait();
     
-    printf("[IODDR0] MASTER: send\n");
+    printf("send\n");
 
     char buff_1[4];
     sprintf(buff_1, "C_1\0");
@@ -132,12 +132,12 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
     portal_write(2, buff_2, 7, 0);
 
 
-    printf("[IODDR0] MASTER: End portal\n");
+    printf("End portal\n");
 
     portal_close();
     join();
 
-    printf("[IODDR0] Goodbye\n");
+    printf("Goodbye\n");
 
 	return 0;
 };

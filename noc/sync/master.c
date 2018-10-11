@@ -27,7 +27,7 @@ void spawn(void)
 	{	
 		sprintf(arg0, "%d", i);
 		args[0] = arg0;
-		pids[i] = mppa_power_base_spawn(i, "cluster_bin", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
+		pids[i] = mppa_power_base_spawn(i, "slave", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
 		assert(pids[i] != -1);
 	}
 }
@@ -43,10 +43,10 @@ void join(void)
 
 #define MASK ~0x3F
 
-void init_sync(int rx_id)
+void init_sync(int tag_rx)
 {
     //! Alloc rx buffer
-    assert(mppa_noc_cnoc_rx_alloc(0, rx_id) == 0);
+    assert(mppa_noc_cnoc_rx_alloc(0, tag_rx) == 0);
     
     //! Notification
     mppa_cnoc_mailbox_notif_t notif;
@@ -60,12 +60,12 @@ void init_sync(int rx_id)
     config.mode = MPPA_NOC_CNOC_RX_BARRIER;
     config.init_value = MASK;
 
-    assert(mppa_noc_cnoc_rx_configure(0, rx_id, config, &notif) == 0);
+    assert(mppa_noc_cnoc_rx_configure(0, tag_rx, config, &notif) == 0);
 }
 
-void sync(int rx_id)
+void sync(int tag_rx)
 {
-    mppa_noc_wait_clear_event(0, MPPA_NOC_INTERRUPT_LINE_CNOC_RX, rx_id);
+    mppa_noc_wait_clear_event(0, MPPA_NOC_INTERRUPT_LINE_CNOC_RX, tag_rx);
 
     //! Retrigger
 
@@ -81,37 +81,37 @@ void sync(int rx_id)
     config.mode = MPPA_NOC_CNOC_RX_BARRIER;
     config.init_value = ~0x3F;
 
-    assert(mppa_noc_cnoc_rx_configure(0, rx_id, config, &notif) == 0);
+    assert(mppa_noc_cnoc_rx_configure(0, tag_rx, config, &notif) == 0);
 }
 
-void end_sync(int rx_id)
+void end_sync(int tag_rx)
 {
-    mppa_noc_cnoc_rx_free(0, rx_id);
+    mppa_noc_cnoc_rx_free(0, tag_rx);
 }
 
 //! MAIN
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **argv)
 {
-    printf("[IODDR0] MASTER: Start sync\n");
+    printf("Start sync\n");
 
     init_sync(16);
 
     spawn();
 
-	printf("[IODDR0] MASTER: Wait\n");
+	printf("Wait\n");
 
     sync(16);
     
-    printf("[IODDR0] MASTER: Sync\n");
+    printf("Sync\n");
 
     end_sync(16);
 
-    printf("[IODDR0] MASTER: End Sync\n");
+    printf("End Sync\n");
 
     join();
 
-    printf("[IODDR0] Goodbye\n");
+    printf("Goodbye\n");
 
 	return 0;
 };

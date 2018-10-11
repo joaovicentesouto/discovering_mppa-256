@@ -12,29 +12,29 @@
 #define MASK_1 0x10
 #define MASK_2 0x20
 
-int init_sync(int rx_id, int source_cluster, int target_cluster)
+int init_sync(int tag_rx, int source_cluster, int target_cluster)
 {
-    unsigned tx_id = 0;
+    unsigned tag_tx = 0;
     mppa_cnoc_config_t config = { 0 };
     mppa_cnoc_header_t header = { 0 };
 
     mppa_routing_get_cnoc_unicast_route(source_cluster, target_cluster, &config, &header);
-    header._.tag = rx_id;
+    header._.tag = tag_rx;
 
-    assert(mppa_noc_cnoc_tx_alloc_auto(0, &tx_id, MPPA_NOC_BLOCKING) == MPPA_NOC_RET_SUCCESS);
-    mppa_noc_cnoc_tx_configure(0, tx_id, config, header);
+    assert(mppa_noc_cnoc_tx_alloc_auto(0, &tag_tx, MPPA_NOC_BLOCKING) == MPPA_NOC_RET_SUCCESS);
+    mppa_noc_cnoc_tx_configure(0, tag_tx, config, header);
 
-    return tx_id;
+    return tag_tx;
 }
 
-void sync(int tx_id, uint64_t mask)
+void sync(int tag_tx, uint64_t mask)
 {
-    mppa_noc_cnoc_tx_push_eot(0, tx_id, mask);
+    mppa_noc_cnoc_tx_push_eot(0, tag_tx, mask);
 }
 
-void end_sync(int tx_id)
+void end_sync(int tag_tx)
 {
-    mppa_noc_cnoc_tx_free(0, tx_id);
+    mppa_noc_cnoc_tx_free(0, tag_tx);
 }
 
 int main(__attribute__((unused)) int argc, const char **argv)
@@ -42,28 +42,28 @@ int main(__attribute__((unused)) int argc, const char **argv)
     // int id = __k1_get_cluster_id();
     int id = atoi(argv[0]);
 
-    printf("[IODDR0] Cluster %d: Start sync\n", id);
+    printf("Start sync\n");
 
-    int tx_id = init_sync(16, id, 128);
+    int tag_tx = init_sync(16, id, 128);
 
     if (id == 1) //! cluster 1
     {
-        printf("[IODDR0] Cluster %d: Wait %d\n", id, MASK_0);
-        sync(tx_id, MASK_0);
+        printf("Wait 0x%u\n", MASK_0);
+        sync(tag_tx, MASK_0);
     } 
     else //! cluster 2
     {
-        printf("[IODDR0] Cluster %d: Wait %d - %d\n", id, MASK_1, MASK_2);
-        sync(tx_id, MASK_1);
-        sync(tx_id, MASK_2);
+        printf("Wait 0x%u - 0x%u\n", MASK_1, MASK_2);
+        sync(tag_tx, MASK_1);
+        sync(tag_tx, MASK_2);
     }
     
-    printf("[IODDR0] Cluster %d: Sync\n", id);
+    printf("Sync\n");
 
-    end_sync(tx_id);
+    end_sync(tag_tx);
 
-    printf("[IODDR0] Cluster %d: End Sync\n", id);
-	printf("[IODDR0] Cluster %d: Goodbye\n", id);
+    printf("End Sync\n");
+	printf("Goodbye\n");
 
 	return 0;
 }

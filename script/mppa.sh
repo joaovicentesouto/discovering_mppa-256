@@ -6,35 +6,20 @@
 export BINDIR=bin
 export K1DIR=/usr/local/k1tools/bin
 
-# Default Parameters.
-export NPROCS=2
+for kernel in sync_exec sync_2_exec portal_exec portal_2_exec;
+do
+	echo " "
+	echo "  ========== Running Kernel ==========  "
+	$K1DIR/k1-jtag-runner                               \
+		--multibinary=$BINDIR/$kernel.img               \
+		--exec-multibin=IODDR0:master
+done
 
-if [ -z $1 ]
+if [ "$1" = "noc" ]
 then
-	echo "You must specify ipc or noc mode."
-	exit 1
+	echo " "
+	echo "  ========== Running Kernel ==========  "
+	$K1DIR/k1-jtag-runner                               \
+		--multibinary=$BINDIR/mailbox_exec.img          \
+		--exec-multibin=IODDR0:master
 fi
-
-if [ "$1" = "ipc" ];
-then
-	echo "  ========== IPC MODE ==========  "
-	for kernel in portal_2_exec;
-	do
-		echo "  ========== Running SYNC Kernel ==========  "
-		$K1DIR/k1-jtag-runner                               \
-			--multibinary=$BINDIR/$kernel.img               \
-			--exec-multibin=IODDR0:master
-	done
-elif [ "$1" = "noc" ];
-then
-	echo "  ========== NOC MODE ==========  "
-	for kernel in mailbox_exec;
-	do
-		echo "  ========== Running SYNC Kernel ==========  "
-		$K1DIR/k1-jtag-runner                               \
-			--multibinary=$BINDIR/$kernel.img               \
-			--exec-multibin=IODDR0:io_bin
-	done
-fi
-
-

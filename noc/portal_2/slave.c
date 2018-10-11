@@ -68,7 +68,7 @@ void portal_read(char * buffer, int size, int offset)
 void portal_wait()
 {
     int event = mppa_noc_wait_clear_event(0, MPPA_NOC_INTERRUPT_LINE_DNOC_RX, portal_rx);
-    printf("[IODDR0] ..: events counter: %d\n", event);
+    printf("events counter: %d\n", event);
 
     mppa_noc_dnoc_rx_lac_event_counter(0, portal_rx);
     mppa_noc_dnoc_rx_lac_item_counter(0, portal_rx);
@@ -87,27 +87,27 @@ int main(__attribute__((unused)) int argc, const char **argv)
     int offset = id == 1 ? 0 : 1;
     int buffer_size = id == 1 ? 4 : 7;
 
-    printf("[IODDR0] Cluster %d: Start portal\n", id);
+    printf("Start portal\n");
 
     portal_open(id);
 
-    printf("[IODDR0] Cluster %d: send\n", id);
+    printf("send\n");
 
     portal_signal(1 << offset);
     
-    printf("[IODDR0] Cluster %d: Sync\n", id);
+    printf("Sync\n");
 
     char buffer[buffer_size];
     portal_read(buffer, buffer_size, 0);
     portal_wait();
     
-    printf("[IODDR0] Cluster %d: B: %s\n", id, buffer);
+    printf("B: %s\n", buffer);
 
-    printf("[IODDR0] Cluster %d: End Sync\n", id);
+    printf("End Sync\n");
 
     portal_close();
 
-	printf("[IODDR0] Cluster %d: Goodbye\n", id);
+	printf("Goodbye\n");
 
 	return 0;
 }

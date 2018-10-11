@@ -3,7 +3,7 @@
 #
 
 # Executable.
-EXEC = sync_exec_2
+EXEC = sync_2_exec
 
 # Use bare libraries
 system-name := bare
@@ -13,21 +13,21 @@ cflags := -fopenmp -O3 -std=gnu99 -g -mhypervisor -Wall -Wextra -Winit-self -Wsw
 MPPAFlags := -g -lvbsp -lmppaipc -lutask -lgomp -lmppa_remote -lmppa_async -lmppa_request_engine -lmppapower -lmppanoc -lmpparouting -mhypervisor -Wl,--defsym=_LIBNOC_DISABLE_FIFO_FULL_CHECK=0
 
 # Builds master binary.
-io-bin := io_bin
-io_bin-cflags := -D_MASTER_
-io_bin-lflags := $(MPPAFlags) -lpcie_queue 
-io_bin-srcs := master.c
+io-bin := master
+master-cflags := -D_MASTER_
+master-lflags := $(MPPAFlags) -lpcie_queue 
+master-srcs := master.c
 
 # Builds slave binary.
-cluster-bin := cluster_bin
+cluster-bin := slave
 cluster-cflags := -I .
 cluster-system := $(cluster_system)
 cluster-lflags := $(MPPAFlags)
-cluster_bin-srcs := slave.c
+slave-srcs := slave.c
 
 # Builds image (master + slave)
 mppa-bin := multibin_bin
-multibin_bin-objs := io_bin cluster_bin
+multibin_bin-objs := master slave
 multibin_bin-name := $(EXEC).img
 
 # must be at the end of the makefile!

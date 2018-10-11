@@ -91,27 +91,27 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
     int id = __k1_get_cluster_id();
     // int id = atoi(argv[0]);
 
-    printf("[IODDR0] Cluster %d: Start sync\n", id);
+    printf("Start sync\n");
 
     init_sync(id);
     
-    printf("[IODDR0] Cluster %d: Sync\n", id);
+    printf("Sync\n");
 
     uint64_t value = 1 << (id == 1 ? 0 : 1);
 
     mppa_signal(value);
 
-    printf("[IODDR0] Cluster %d: Wait %jx\n", id, value);
+    printf("Wait %jx\n", value);
 
     // while(true);
 
     mppa_wait();
 
-    printf("[IODDR0] Cluster %d: End Sync\n", id);
+    printf("End Sync\n");
 
     end_sync();
 
-	printf("[IODDR0] Cluster %d: Goodbye\n", id);
+	printf("Goodbye\n");
 
 	return 0;
 }

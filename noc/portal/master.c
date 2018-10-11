@@ -26,7 +26,7 @@ void spawn(void)
 	{	
 		sprintf(arg0, "%d", i);
 		args[0] = arg0;
-		pids[i] = mppa_power_base_spawn(i, "cluster_bin", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
+		pids[i] = mppa_power_base_spawn(i, "slave", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
 		assert(pids[i] != -1);
 	}
 }
@@ -78,7 +78,7 @@ void portal_aio_wait()
     // }
 
     int event = mppa_noc_wait_clear_event(0, MPPA_NOC_INTERRUPT_LINE_DNOC_RX, portal_rx);
-    printf("[IODDR0] MASTER: events counter: %d\n", event);
+    printf("events counter: %d\n", event);
 
     mppa_noc_dnoc_rx_lac_event_counter(0, portal_rx);
     mppa_noc_dnoc_rx_lac_item_counter(0, portal_rx);
@@ -94,7 +94,7 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
     char buffer[11];
     memset(buffer, 0, 11);
 
-    printf("[IODDR0] MASTER: Start portal\n");
+    printf("Start portal\n");
 
     portal_open();
 
@@ -102,19 +102,19 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 
     spawn();
 
-	printf("[IODDR0] MASTER: Wait\n");
+	printf("Wait\n");
 
     portal_aio_wait();
     
-    printf("[IODDR0] MASTER: Msg: %s\n", buffer);
+    printf("Msg: %s\n", buffer);
 
     portal_close();
 
-    printf("[IODDR0] MASTER: End portal\n");
+    printf("End portal\n");
 
     join();
 
-    printf("[IODDR0] Goodbye\n");
+    printf("Goodbye\n");
 
 	return 0;
 };
