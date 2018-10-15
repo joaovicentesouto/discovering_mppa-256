@@ -4,6 +4,7 @@
 #
 
 # Directories.
+export INCDIR = $(CURDIR)/include
 export BINDIR  = $(CURDIR)/bin
 
 # Builds all kernels for MPPA-256.

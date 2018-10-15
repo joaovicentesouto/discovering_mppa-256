@@ -15,8 +15,8 @@ k1-lflags := -lmppaipc
 
 # Builds master binary.
 io-bin := master
-master-cflags := -mos=rtems
-master-srcs :=  master.c
+master-cflags := -mos=rtems -I $(INCDIR)
+master-srcs := master.c $(LIBDIR)/mppa.c
 
 # Builds slave binary
 cluster-bin := slave

@@ -5,10 +5,14 @@
 #
 
 # Directories.
+export LIBDIR = $(CURDIR)/libsrc
 export K1_TOOLCHAIN_DIR = /usr/local/k1tools
 
 # Builds all kernels.
-all:  cmd_sync cmd_sync_2 cmd_portal cmd_portal_2
+all: cmd_sync cmd_sync_2 cmd_portal cmd_portal_2
+
+# cmd_lib:
+# 	cd lib && $(MAKE) all
 
 # Builds sync kernel.
 cmd_sync:
