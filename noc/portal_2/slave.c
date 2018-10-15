@@ -50,6 +50,8 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 	return 0;
 }
 
+//! ================ Functions ================
+
 void portal_open(int source_cluster)
 {
     //! Portal

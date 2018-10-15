@@ -12,9 +12,9 @@
 #define MASK_1 0x10
 #define MASK_2 0x20
 
-int init_sync(int tag_rx, int source_cluster, int target_cluster);
+int init(int tag_rx, int source_cluster, int target_cluster);
 void sync(int tag_tx, uint64_t mask);
-void end_sync(int tag_tx);
+void end(int tag_tx);
 
 int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
 {
@@ -22,28 +22,30 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 
         printf("Start sync\n");
 
-    int tag_tx = init_sync(16, id, 128);
+    int tag_tx = init(16, id, 128);
 
     if (id == 1) //! cluster 1
     {
-            printf("Signal 0x%u\n", MASK_0);
-        sync(tag_tx, MASK_0);
+            // printf("Signal 0x%u\n", MASK_0);
+        sync(tag_tx, 0xF);
     } 
     else //! cluster 2
     {
-            printf("Signal 0x%u - 0x%u\n", MASK_1, MASK_2);
-        sync(tag_tx, MASK_1);
-        sync(tag_tx, MASK_2);
+            // printf("Signal 0x%u - 0x%u\n", MASK_1, MASK_2);
+        sync(tag_tx, 0x10);
+        sync(tag_tx, 0x20);
     }
 
-    end_sync(tag_tx);
+    end(tag_tx);
 
 	    printf("Goodbye\n");
 
 	return 0;
 }
 
-int init_sync(int tag_rx, int source_cluster, int target_cluster)
+//! ================ Functions ================
+
+int init(int tag_rx, int source_cluster, int target_cluster)
 {
     unsigned tag_tx = 0;
     mppa_cnoc_config_t config = { 0 };
@@ -60,10 +62,11 @@ int init_sync(int tag_rx, int source_cluster, int target_cluster)
 
 void sync(int tag_tx, uint64_t mask)
 {
+    printf("Signal 0x%u\n", MASK_0);
     mppa_noc_cnoc_tx_push_eot(0, tag_tx, mask);
 }
 
-void end_sync(int tag_tx)
+void end(int tag_tx)
 {
     mppa_noc_cnoc_tx_free(0, tag_tx);
 }

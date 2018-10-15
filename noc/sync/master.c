@@ -10,36 +10,30 @@
 #include <mppa_noc.h>
 #include <mppa_routing.h>
 
-//! Spawn section
-#define NUM_CLUSTERS 16
-static mppa_power_pid_t pids[NUM_CLUSTERS];
-
-void spawn(void);
-void join(void);
+#include <spawn.h>
 
 //! Sync section
 #define MASK ~0x3F
 
-void init_sync(int tag_rx);
+void init(int tag_rx);
 void sync(int tag_rx);
-void end_sync(int tag_rx);
+void end(int tag_rx);
 
-//! Main
 int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **argv)
 {
         printf(" ====== NoC: Sync 1 ======\n");
         printf(" Open Sync\n");
 
-    init_sync(16);
+    init(16);
     spawn();
 
-	    printf("Wait\n");
+	    printf("Wait 0x%x\n", MASK);
 
     sync(16);
     
         printf("Sync\n");
 
-    end_sync(16);
+    end(16);
 
         printf("End Sync\n");
 
@@ -50,9 +44,9 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
 	return 0;
 };
 
-// ====== Sync functions ======
+//! ================ Functions ================
 
-void init_sync(int tag_rx)
+void init(int tag_rx)
 {
     //! Alloc rx buffer
     assert(mppa_noc_cnoc_rx_alloc(0, tag_rx) == 0);
@@ -93,33 +87,7 @@ void sync(int tag_rx)
     assert(mppa_noc_cnoc_rx_configure(0, tag_rx, config, &notif) == 0);
 }
 
-void end_sync(int tag_rx)
+void end(int tag_rx)
 {
     mppa_noc_cnoc_rx_free(0, tag_rx);
-}
-
-// ====== Spawn functions ======
-
-void spawn(void)
-{
-    int i;
-	char arg0[4];
-	char *args[2];
-
-	/* Spawn slaves. */
-	args[1] = NULL;
-	for (i = 1; i < 3; i++)
-	{	
-		sprintf(arg0, "%d", i);
-		args[0] = arg0;
-		pids[i] = mppa_power_base_spawn(i, "slave", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
-		assert(pids[i] != -1);
-	}
-}
-
-void join(void)
-{
-    int i, ret;
-	for (i = 1; i < 3; i++)
-		mppa_power_base_waitpid(i, &ret, 0);
 }

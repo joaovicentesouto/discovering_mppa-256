@@ -5,23 +5,22 @@
 #include <stdint.h>
 
 
-#include <mppa.h>
+#include <spawn.h>
 
 //! Sync section
 #define MASK ~0x3F
 static int sync_fd;
 
-void init_sync(uint64_t mask);
-void end_sync(void);
-void wait(void);
+void init(uint64_t mask);
+void end(void);
+void wait_signal(void);
 
-//! Main
 int main(__attribute__((unused)) int argc, const char **argv)
 {
         printf(" ====== IPC: Sync 1 ======\n");
         printf(" Open portals\n");
 
-    init_sync(MASK);
+    init(MASK);
     spawn();
 
 	    printf("Wait\n");
@@ -30,7 +29,7 @@ int main(__attribute__((unused)) int argc, const char **argv)
     
         printf("Sync\n");
 
-    end_sync();
+    end();
 
         printf("Join\n");
 
@@ -41,8 +40,9 @@ int main(__attribute__((unused)) int argc, const char **argv)
 	return 0;
 };
 
-// ====== Sync functions ======
-void init_sync(uint64_t mask)
+//! ================ Functions ================
+
+void init(uint64_t mask)
 {
     char pathname[128];
     sprintf(pathname, "/mppa/sync/128:16");
@@ -52,12 +52,12 @@ void init_sync(uint64_t mask)
     mppa_ioctl(sync_fd, MPPA_RX_SET_MATCH, mask);
 }
 
-void end_sync(void)
+void end(void)
 {
     mppa_close(sync_fd);
 }
 
-void wait(void)
+void wait_signal(void)
 {
     uint64_t value;
     mppa_read(sync_fd, &value, sizeof(value));

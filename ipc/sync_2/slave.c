@@ -8,10 +8,10 @@
 static int sync_in;
 static int sync_out;
 
-void init_sync(uint64_t mask);
-void end_sync(void);
-void mppa_wait(void);
-void mppa_signal(uint64_t mask);
+void init(uint64_t mask);
+void end(void);
+void wait_signal(void);
+void send_signal(uint64_t mask);
 
 int main(__attribute__((unused)) int argc, const char **argv)
 {
@@ -19,28 +19,28 @@ int main(__attribute__((unused)) int argc, const char **argv)
 
         printf("C%d, Start sync\n", id);
 
-    init_sync(MASK);
+    init(MASK);
 
         printf("C%d, Signal\n", id);
 
     if (id == 1)
-        mppa_signal(1 << 0);
+        send_signal(1 << 0);
     else
-        mppa_signal(1 << 1);
+        send_signal(1 << 1);
     
         printf("C%d, Wait\n", id);
 
-    mppa_wait();
-    end_sync();
+    wait_signal();
+    end();
 
 	    printf("C%d, Goodbye\n", id);
 
 	return 0;
 }
 
-// ====== Portal functions ======
+//! ================ Functions ================
 
-void init_sync(uint64_t mask)
+void init(uint64_t mask)
 {
     char path_in[128];
     char path_out[128];
@@ -56,19 +56,19 @@ void init_sync(uint64_t mask)
     mppa_ioctl(sync_in, MPPA_RX_SET_MATCH, mask);
 }
 
-void end_sync(void)
+void end(void)
 {
     mppa_close(sync_in);
     mppa_close(sync_out);
 }
 
-void mppa_wait(void)
+void wait_signal(void)
 {
     uint64_t value;
     mppa_read(sync_in, &value, sizeof(value));
 }
 
-void mppa_signal(uint64_t mask)
+void send_signal(uint64_t mask)
 {
     mppa_write(sync_out, &mask, sizeof(mask));
 }

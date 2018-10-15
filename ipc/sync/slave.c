@@ -10,9 +10,9 @@
 
 static int sync_fd;
 
-void init_sync(void);
-void sync(uint64_t mask);
-void end_sync(void);
+void init(void);
+void send_signal(uint64_t mask);
+void end(void);
 
 int main(__attribute__((unused)) int argc, const char **argv)
 {
@@ -20,44 +20,44 @@ int main(__attribute__((unused)) int argc, const char **argv)
 
         printf("C%d, Start sync\n", id);
 
-    init_sync();
+    init();
 
     if (id == 1) //! cluster 1
     {
             printf("C%d, Signal 0x%x\n", id, MASK_0);
-        sync(MASK_0);
+        send_signal(MASK_0);
     } 
     else //! cluster 2
     {
             printf("C%d, Signal 0x%x - 0x%x\n", id, MASK_1, MASK_2);
-        sync(MASK_1);
-        sync(MASK_2);
+        send_signal(MASK_1);
+        send_signal(MASK_2);
     }
     
         printf("C%d, Sync\n", id);
 
-    end_sync();
+    end();
 
 	    printf("C%d, Goodbye\n", id);
 
 	return 0;
 }
 
-// ====== Portal functions ======
+//! ================ Functions ================
 
-void init_sync(void)
+void init(void)
 {
     char pathname[128] = "/mppa/sync/128:16";
     sync_fd = mppa_open(pathname, O_WRONLY);
     assert(sync_fd != -1);
 }
 
-void sync(uint64_t mask)
+void send_signal(uint64_t mask)
 {
     mppa_write(sync_fd, &mask, sizeof(mask));
 }
 
-void end_sync(void)
+void end(void)
 {
     mppa_close(sync_fd);
 }

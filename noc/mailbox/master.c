@@ -8,12 +8,7 @@
 #include <mppa_noc.h>
 #include <mppa_routing.h>
 
-//! Spawn section
-#define NUM_CLUSTERS 16
-static mppa_power_pid_t pids[NUM_CLUSTERS];
-
-void spawn(void);
-void join(void);
+#include <spawn.h>
 
 //! Mailbox section
 static int mailbox_rx = 16;
@@ -22,7 +17,6 @@ void init();
 void recive_mailbox(uint64_t * mailbox);
 void end();
 
-//! Main
 int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **argv)
 {
         printf(" ====== NoC: Mailbox ======\n");
@@ -49,11 +43,10 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
 	return 0;
 };
 
-// ====== Mailbox functions ======
+//! ================ Functions ================
 
 void init()
 {
-    //! ============= MAILBOX =============
     assert(mppa_noc_cnoc_rx_alloc(0, mailbox_rx) == 0);
     
     //! Notification
@@ -95,30 +88,4 @@ void recive_mailbox(uint64_t * mailbox)
     config.init_value = 0;
 
     assert(mppa_noc_cnoc_rx_configure(0, mailbox_rx, config, &notif) == 0);
-}
-
-// ====== Spawn functions ======
-
-void spawn(void)
-{
-    int i;
-	char arg0[4];
-	char *args[2];
-
-	/* Spawn slaves. */
-	args[1] = NULL;
-	for (i = 0; i < 1; i++)
-	{	
-		sprintf(arg0, "%d", i);
-		args[0] = arg0;
-		pids[i] = mppa_power_base_spawn(i, "slave", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
-		assert(pids[i] != -1);
-	}
-}
-
-void join(void)
-{
-    int i, ret;
-	for (i = 0; i < 1; i++)
-		mppa_power_base_waitpid(i, &ret, 0);
 }

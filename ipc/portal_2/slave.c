@@ -46,7 +46,7 @@ int main(__attribute__((unused)) int argc, const char **argv)
 	return 0;
 }
 
-// ====== Portal functions ======
+//! ================ Functions ================
 
 void portal_open(void)
 {

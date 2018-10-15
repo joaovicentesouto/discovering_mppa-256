@@ -46,6 +46,8 @@ int main(__attribute__((unused)) int argc, const char **argv)
 	return 0;
 }
 
+//! ================ Functions ================
+
 void portal_open(void)
 {
     char pathname[128] = "/mppa/portal/128:7";

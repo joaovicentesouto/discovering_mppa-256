@@ -9,12 +9,7 @@
 #include <mppa_noc.h>
 #include <mppa_routing.h>
 
-//! Spawn section
-#define NUM_CLUSTERS 16
-static mppa_power_pid_t pids[NUM_CLUSTERS];
-
-void spawn(void);
-void join(void);
+#include <spawn.h>
 
 //! Portal section
 static int portal_rx = 7;
@@ -53,7 +48,7 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 	return 0;
 };
 
-// ====== Portal functions ======
+//! ================ Functions ================
 
 void portal_open(void)
 {
@@ -100,30 +95,4 @@ void portal_aio_wait(void)
 
     mppa_noc_dnoc_rx_lac_event_counter(0, portal_rx);
     mppa_noc_dnoc_rx_lac_item_counter(0, portal_rx);
-}
-
-// ====== Spawn functions ======
-
-void spawn(void)
-{
-    int i;
-	char arg0[4];
-	char *args[2];
-
-	/* Spawn slaves. */
-	args[1] = NULL;
-	for (i = 1; i < 3; i++)
-	{	
-		sprintf(arg0, "%d", i);
-		args[0] = arg0;
-		pids[i] = mppa_power_base_spawn(i, "slave", (const char **)args, NULL, MPPA_POWER_SHUFFLING_ENABLED);
-		assert(pids[i] != -1);
-	}
-}
-
-void join(void)
-{
-    int i, ret;
-	for (i = 1; i < 3; i++)
-		mppa_power_base_waitpid(i, &ret, 0);
 }

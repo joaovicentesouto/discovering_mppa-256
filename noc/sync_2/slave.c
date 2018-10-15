@@ -14,10 +14,10 @@
 static int sync_in;
 static int sync_out;
 
-void init_sync(int source_cluster);
-void mppa_wait(void);
-void mppa_signal(uint64_t value);
-void end_sync(void);
+void init(int source_cluster);
+void wait_signal(void);
+void send_signal(uint64_t value);
+void end(void);
 
 int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
 {
@@ -25,25 +25,27 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 
         printf("Start sync\n");
 
-    init_sync(id);
+    init(id);
     
         printf("Sync\n");
 
     uint64_t value = 1 << (id == 1 ? 0 : 1);
 
-    mppa_signal(value);
+    send_signal(value);
 
         printf("Signal %jx\n", value);
 
-    mppa_wait();
-    end_sync();
+    wait_signal();
+    end();
 
 	    printf("Goodbye\n");
 
 	return 0;
 }
 
-void init_sync(int source_cluster)
+//! ================ Functions ================
+
+void init(int source_cluster)
 {
     //! Notification RX
     //! Alloc buffer
@@ -82,7 +84,7 @@ void init_sync(int source_cluster)
     mppa_noc_cnoc_tx_configure(0, sync_out, config, header);
 }
 
-void mppa_wait(void)
+void wait_signal(void)
 {
     mppa_noc_wait_clear_event(0, MPPA_NOC_INTERRUPT_LINE_CNOC_RX, sync_in);
 
@@ -104,12 +106,12 @@ void mppa_wait(void)
     }
 }
 
-void mppa_signal(uint64_t value)
+void send_signal(uint64_t value)
 {
     mppa_noc_cnoc_tx_push_eot(0, sync_out, value);
 }
 
-void end_sync(void)
+void end(void)
 {
     mppa_noc_cnoc_rx_free(0, sync_in);
     mppa_noc_cnoc_tx_free(0, sync_out);

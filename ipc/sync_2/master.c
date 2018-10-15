@@ -1,38 +1,36 @@
 #include <mppaipc.h>
-// #include <mppa/osconfig.h>
 #include <stdio.h>
 #include <assert.h>
 #include <stdint.h>
 
-#include <mppa.h>
+#include <spawn.h>
 
 //! Sync section
 #define MASK ~0x3
 static int sync_in;
 static int sync_out;
 
-void init_sync(uint64_t mask);
-void end_sync(void);
-void mppa_wait(void);
-void mppa_signal(void);
+void init(uint64_t mask);
+void end(void);
+void wait_signal(void);
+void send_signal(void);
 
-//! Main
 int main(__attribute__((unused)) int argc, const char **argv)
 {
         printf(" ====== IPC: Sync 2 ======\n");
         printf(" Open portals\n");
 
-    init_sync(MASK);
+    init(MASK);
     spawn();
 
 	    printf("Wait\n");
 
-    mppa_wait();
+    wait_signal();
     
         printf("Sync\n");
 
-    mppa_signal();
-    end_sync();
+    send_signal();
+    end();
 
         printf("Join\n");
 
@@ -43,8 +41,9 @@ int main(__attribute__((unused)) int argc, const char **argv)
 	return 0;
 };
 
+//! ================ Functions ================
 
-void init_sync(uint64_t mask)
+void init(uint64_t mask)
 {
     char path_in[128];
     char path_out[128];
@@ -60,19 +59,19 @@ void init_sync(uint64_t mask)
     mppa_ioctl(sync_in, MPPA_RX_SET_MATCH, mask);
 }
 
-void end_sync(void)
+void end(void)
 {
     mppa_close(sync_in);
     mppa_close(sync_out);
 }
 
-void mppa_wait(void)
+void wait_signal(void)
 {
     uint64_t value;
     mppa_read(sync_in, &value, sizeof(value));
 }
 
-void mppa_signal(void)
+void send_signal(void)
 {
     int ranks[2] = {1, 2};
     mppa_ioctl(sync_out, MPPA_TX_SET_RX_RANKS, 2, ranks);

@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <mppa.h>
+#include <spawn.h>
 
 //! Portal section
 #define MASK ~0x3F
@@ -47,7 +47,7 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 	return 0;
 };
 
-// ====== Portal functions ======
+//! ================ Functions ================
 
 void portal_open(void)
 {

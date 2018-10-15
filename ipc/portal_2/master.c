@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <stdint.h>
 
-#include <mppa.h>
+#include <spawn.h>
 
 //! Portal section
 #define MASK ~0x3
@@ -15,7 +15,6 @@ void portal_close(void);
 void portal_wait(void);
 void portal_write(int rank, char * buffer, int size, int offset);
 
-//! Main
 int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
 {
     char buff_1[4];
@@ -50,7 +49,7 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 	return 0;
 };
 
-// ====== Portal functions ======
+//! ================ Functions ================
 
 void portal_open(void)
 {
