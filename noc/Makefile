@@ -5,7 +5,7 @@
 #
 
 # Directories.
-export LIBDIR = $(CURDIR)/libsrc
+export LIBSRCDIR = $(CURDIR)/libsrc
 export K1_TOOLCHAIN_DIR = /usr/local/k1tools
 
 # Builds all kernels.

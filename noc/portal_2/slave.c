@@ -9,110 +9,47 @@
 #include <mppa_noc.h>
 #include <mppa_routing.h>
 
+#include <noc.h>
+
 #define MASK_0 0xF
 #define MASK_1 0x10
 #define MASK_2 0x20
 
-static int portal_rx, sync_tx;
-
-void portal_open(int source_cluster);
-void portal_signal(uint64_t mask);
-void portal_read(char * buffer, int size, int offset);
-void portal_wait();
-void portal_close(void);
-
 int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
 {
+    int interface_in = 0;
+    int interface_out = 0;
+    int tag_in = 7;
+    int target_tag = 7;
+    int target_cluster = 128;
+
     int id = __k1_get_cluster_id();
     int offset = id == 1 ? 0 : 1;
     int buffer_size = id == 1 ? 4 : 7;
-
-        printf("Open portal\n");
-
-    portal_open(id);
-
-        printf("Signal\n");
-
-    portal_signal(1 << offset);
-    
-        printf("Recive Msg\n");
-
     char buffer[buffer_size];
-    portal_read(buffer, buffer_size, 0);
-    portal_wait();
+
+    printf("C#: Alloc and config Portals\n");
+
+    dnoc_rx_alloc(interface_in, tag_in);
+    dnoc_rx_config(interface_in, tag_in, buffer, buffer_size, 0);
+
+    int tag_out = cnoc_tx_alloc_auto(interface_out);
+    cnoc_tx_config(interface_out, tag_out, id, target_tag, target_cluster);
+
+    printf("Signal\n");
+
+    cnoc_tx_write(interface_out, tag_out, 1 << offset);
     
-        printf("Msg: %s\n", buffer);
+    printf("Recive Msg\n");
+    
+    dnoc_rx_wait(interface_in, tag_in);
+    
+    printf("Msg: %s\n", buffer);
 
-    portal_close();
+    cnoc_tx_free(interface_out, tag_out);
+    dnoc_rx_free(interface_in, tag_in);
 
-	    printf("Goodbye\n");
+    printf("Goodbye\n");
 
 	return 0;
-}
-
-//! ================ Functions ================
-
-void portal_open(int source_cluster)
-{
-    //! Portal
-    portal_rx = 7;
-    assert(mppa_noc_dnoc_rx_alloc(0, portal_rx) == MPPA_NOC_RET_SUCCESS);
-
-    //! Sync
-    unsigned aux = 0;
-
-    //! Alloc buffer
-    assert(mppa_noc_cnoc_tx_alloc_auto(0, &aux, MPPA_NOC_BLOCKING) == MPPA_NOC_RET_SUCCESS);
-    sync_tx = aux;
-
-    mppa_cnoc_config_t config = { 0 };
-    mppa_cnoc_header_t header = { 0 };
-
-    int target_tag = 16;
-    int target_cluster = 128;
-
-    mppa_routing_get_cnoc_unicast_route(source_cluster, target_cluster, &config, &header);
-    header._.tag = target_tag;
-
-    mppa_noc_cnoc_tx_configure(0, sync_tx, config, header);
-}
-
-void portal_signal(uint64_t mask)
-{
-    mppa_noc_cnoc_tx_push_eot(0, sync_tx, mask);
-}
-
-void portal_read(char * buffer, int size, int offset)
-{
-   mppa_noc_dnoc_rx_configuration_t rx_configuration = {
-        .buffer_base = (uintptr_t) buffer,
-        .buffer_size = size,
-        .current_offset = offset,
-        .item_reload = 0,
-        .item_counter = size,
-        .event_counter = 0,
-//      .reload_mode = MPPA_NOC_RX_RELOAD_MODE_INCR_DATA_NOTIF,     //! Increment item and event counter
-        .reload_mode = MPPA_NOC_RX_RELOAD_MODE_DECR_DATA_NO_RELOAD, //! Decrement item, when 0 is reached, generate an event
-        .activation = MPPA_NOC_ACTIVATED,
-        .counter_id = 0
-    };
-
-    assert(mppa_noc_dnoc_rx_configure(0, portal_rx, rx_configuration) == 0);
-
-    mppa_noc_dnoc_rx_lac_event_counter(0, portal_rx); //! Clean events register etc...
-}
-
-void portal_wait()
-{
-    int event = mppa_noc_wait_clear_event(0, MPPA_NOC_INTERRUPT_LINE_DNOC_RX, portal_rx);
-    printf("events counter: %d\n", event);
-
-    mppa_noc_dnoc_rx_lac_event_counter(0, portal_rx);
-    mppa_noc_dnoc_rx_lac_item_counter(0, portal_rx);
-}
-
-void portal_close(void)
-{
-    mppa_noc_dnoc_rx_free(0, portal_rx);
-    mppa_noc_dnoc_tx_free(0, sync_tx);
 }

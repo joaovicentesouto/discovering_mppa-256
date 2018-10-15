@@ -1,0 +1,175 @@
+#include <stdint.h>
+#include <mppa_noc.h>
+#include <mppa_routing.h>
+
+//! Control NoC
+
+int cnoc_rx_alloc(int interface, int tag)
+{
+    return mppa_noc_cnoc_rx_alloc(interface, tag);
+}
+
+void cnoc_rx_free(int interface, int tag)
+{
+    mppa_noc_cnoc_rx_free(interface, tag);
+}
+
+int cnoc_tx_alloc(int interface, int tag)
+{
+    return mppa_noc_cnoc_tx_alloc(interface, tag);
+}
+
+void cnoc_tx_free(int interface, int tag)
+{
+    mppa_noc_cnoc_tx_free(interface, tag);
+}
+
+unsigned cnoc_tx_alloc_auto(int interface)
+{
+    unsigned tag;
+    mppa_noc_cnoc_tx_alloc_auto(interface, &tag, MPPA_NOC_BLOCKING);
+    
+    return tag;
+}
+
+int cnoc_rx_config(int interface, int tag, mppa_noc_cnoc_rx_mode_t mode, uint64_t value)
+{
+    #ifdef _MASTER_
+        unsigned rm_offset = __k1_get_cpu_id();
+    #else
+        unsigned rm_offset = 5;
+    #endif
+
+    //! Notification
+    mppa_cnoc_mailbox_notif_t notif;
+    memset(&notif, 0, sizeof(mppa_cnoc_mailbox_notif_t));
+    notif._.enable = 1;
+    notif._.evt_en = 1;
+    notif._.rm = 1 << rm_offset;
+
+    //! Configuration
+    mppa_noc_cnoc_rx_configuration_t config = {
+        .mode = mode,
+        .init_value = value
+    };
+
+    return mppa_noc_cnoc_rx_configure(interface, tag, config, &notif);
+}
+
+int cnoc_tx_config(int interface, int source_tag, int source_cluster, int target_tag, int target_cluster)
+{
+    mppa_cnoc_config_t config = { 0 };
+    mppa_cnoc_header_t header = { 0 };
+
+    mppa_routing_get_cnoc_unicast_route(source_cluster, target_cluster, &config, &header);
+    header._.tag = target_tag;
+
+    return mppa_noc_cnoc_tx_configure(interface, source_tag, config, header);
+}
+
+void cnoc_rx_wait(int interface, int tag)
+{
+    mppa_noc_wait_clear_event(interface, MPPA_NOC_INTERRUPT_LINE_CNOC_RX, tag);   
+}
+
+uint64_t cnoc_rx_read(int interface, int tag)
+{
+    return mppa_noc_cnoc_rx_get_value(interface, tag);
+}
+
+void cnoc_tx_write(int interface, int tag, uint64_t value)
+{
+    mppa_noc_cnoc_tx_push_eot(interface, tag, value);
+}
+
+//! Data NoC
+
+int dnoc_rx_alloc(int interface, int tag)
+{
+    return mppa_noc_dnoc_rx_alloc(interface, tag);
+}
+
+void dnoc_rx_free(int interface, int tag)
+{
+    mppa_noc_dnoc_rx_free(interface, tag);
+}
+
+int dnoc_tx_alloc(int interface, int tag)
+{
+    return mppa_noc_dnoc_tx_alloc(interface, tag);
+}
+
+void dnoc_tx_free(int interface, int tag)
+{
+    mppa_noc_dnoc_tx_free(interface, tag);
+}
+
+unsigned dnoc_tx_alloc_auto(int interface)
+{
+    unsigned tag;
+    mppa_noc_dnoc_tx_alloc_auto(interface, &tag, MPPA_NOC_BLOCKING);
+    
+    return tag;
+}
+
+int dnoc_rx_config(int interface, int tag, char * buffer, int size, int offset)
+{
+    mppa_noc_dnoc_rx_configuration_t config = {
+        .buffer_base = (uintptr_t) buffer,
+        .buffer_size = size,
+        .current_offset = offset,
+        .item_reload = 0,
+        .item_counter = size,
+        .event_counter = 0,
+//      .reload_mode = MPPA_NOC_RX_RELOAD_MODE_INCR_DATA_NOTIF,     //! Increment item and event counter
+        .reload_mode = MPPA_NOC_RX_RELOAD_MODE_DECR_DATA_NO_RELOAD, //! Decrement item, when 0 is reached, generate an event
+        .activation = MPPA_NOC_ACTIVATED,
+        .counter_id = 0
+    };
+
+    if(mppa_noc_dnoc_rx_configure(interface, tag, config) != 0)
+        return -1;
+
+    mppa_noc_dnoc_rx_lac_event_counter(interface, tag);
+
+    return 0;
+}
+
+void dnoc_rx_wait(int interface, int tag)
+{
+    mppa_noc_wait_clear_event(interface, MPPA_NOC_INTERRUPT_LINE_DNOC_RX, tag);
+
+    mppa_noc_dnoc_rx_lac_event_counter(interface, tag);
+    mppa_noc_dnoc_rx_lac_item_counter(interface, tag);
+}
+
+int dnoc_tx_config(int interface, int tag, int target_tag, int target_cluster)
+{
+    int source_cluster = __k1_get_cluster_id();
+
+    mppa_dnoc_channel_config_t config = { 0 };
+    mppa_dnoc_header_t header = { 0 };
+    header._.tag = target_tag;
+    header._.valid = 1;
+
+    MPPA_NOC_DNOC_TX_CONFIG_INITIALIZER_DEFAULT(config, 0);
+
+    assert(mppa_routing_get_dnoc_unicast_route(source_cluster, target_cluster, &config, &header) == 0);
+    
+    mppa_noc_dnoc_tx_flush(interface, tag);
+    __builtin_k1_fence(); //! Wait
+
+    return mppa_noc_dnoc_tx_configure(interface, tag, header, config);
+}
+
+void dnoc_tx_write(int interface, int tag, char * buffer, int size, int offset)
+{
+    mppa_dnoc_push_offset_t off;
+    off._.offset = offset;
+    off._.protocol = 0x1; //! absolute offset
+    off._.valid = 1;
+
+    mppa_noc_dnoc_tx_set_push_offset(interface, tag, off);
+    mppa_noc_dnoc_tx_send_data(interface, tag, size, buffer);
+    mppa_noc_dnoc_tx_flush_eot(interface, tag);
+}

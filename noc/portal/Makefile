@@ -14,15 +14,16 @@ MPPAFlags := -g -lvbsp -lmppaipc -lutask -lgomp -lmppa_remote -lmppa_async -lmpp
 
 # Builds master binary.
 io-bin := master
-master-cflags := -I $(INCDIR)
+master-cflags := -D_MASTER_ -D_NOC_ -I $(INCDIR)
 master-lflags := $(MPPAFlags) -lpcie_queue 
-master-srcs := master.c $(LIBDIR)/spawn.c
+master-srcs := master.c $(wildcard $(LIBSRCDIR)/*.c)
 
 # Builds slave binary.
 cluster-bin := slave
 cluster-system := $(cluster_system)
+cluster-cflags := -D_NOC_ -I $(INCDIR)
 cluster-lflags := $(MPPAFlags)
-slave-srcs := slave.c
+slave-srcs := slave.c $(LIBSRCDIR)/noc.c
 
 # Builds image (master + slave)
 mppa-bin := multibin_bin

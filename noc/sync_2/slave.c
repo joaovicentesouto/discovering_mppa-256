@@ -8,111 +8,41 @@
 #include <mppa_noc.h>
 #include <mppa_routing.h>
 
-//! Sync section
+#include <noc.h>
 
 #define MASK ~0x0
-static int sync_in;
-static int sync_out;
-
-void init(int source_cluster);
-void wait_signal(void);
-void send_signal(uint64_t value);
-void end(void);
 
 int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
 {
+    int interface_in = 0;
+    int interface_out = 0;
+    int tag_in = 0;
     int id = __k1_get_cluster_id();
-
-        printf("Start sync\n");
-
-    init(id);
+    int target_cluster = 128;
+    int target_tag = 16;
     
-        printf("Sync\n");
+    printf("C#: Alloc and config Syncs\n");
+
+    cnoc_rx_alloc(interface_in, tag_in);
+    cnoc_rx_config(interface_in, tag_in, MPPA_NOC_CNOC_RX_BARRIER, MASK);
+
+    int tag_out = cnoc_tx_alloc_auto(interface_out);
 
     uint64_t value = 1 << (id == 1 ? 0 : 1);
+    
+    printf("Send signal %jx\n", value);
 
-    send_signal(value);
+    cnoc_tx_config(interface_out, tag_out, id, target_tag, target_cluster);
+    cnoc_tx_write(interface_out, tag_out, value);
 
-        printf("Signal %jx\n", value);
+    printf("Wait\n");
 
-    wait_signal();
-    end();
+    cnoc_rx_wait(interface_in, tag_in);
 
-	    printf("Goodbye\n");
+    cnoc_rx_free(interface_in, tag_in);
+    cnoc_tx_free(interface_out, tag_out);
+
+	printf("Goodbye\n");
 
 	return 0;
-}
-
-//! ================ Functions ================
-
-void init(int source_cluster)
-{
-    //! Notification RX
-    //! Alloc buffer
-    sync_in = 16;
-    assert(mppa_noc_cnoc_rx_alloc(0, sync_in) == MPPA_NOC_RET_SUCCESS);
-
-    mppa_cnoc_mailbox_notif_t notif;
-    memset(&notif, 0, sizeof(mppa_cnoc_mailbox_notif_t));
-    notif._.enable = 1;
-    notif._.evt_en = 1;
-    notif._.rm = 16; //! RM on Compute cluster
-
-    //! Configuration
-    mppa_noc_cnoc_rx_configuration_t config_rx = { 0 };
-    config_rx.mode = MPPA_NOC_CNOC_RX_BARRIER;
-    config_rx.init_value = MASK;
-
-    assert(mppa_noc_cnoc_rx_configure(0, sync_in, config_rx, &notif) == 0);
-
-    //! Route TX
-    unsigned aux = 0;
-
-    //! Alloc buffer
-    assert(mppa_noc_cnoc_tx_alloc_auto(0, &aux, MPPA_NOC_BLOCKING) == MPPA_NOC_RET_SUCCESS);
-    sync_out = aux;
-
-    mppa_cnoc_config_t config = { 0 };
-    mppa_cnoc_header_t header = { 0 };
-
-    int target_tag = 16;
-    int target_cluster = 128;
-
-    mppa_routing_get_cnoc_unicast_route(source_cluster, target_cluster, &config, &header);
-    header._.tag = target_tag;
-
-    mppa_noc_cnoc_tx_configure(0, sync_out, config, header);
-}
-
-void wait_signal(void)
-{
-    mppa_noc_wait_clear_event(0, MPPA_NOC_INTERRUPT_LINE_CNOC_RX, sync_in);
-
-    //! Retrigger
-    {
-        //! Notification
-        mppa_cnoc_mailbox_notif_t notif;
-        memset(&notif, 0, sizeof(mppa_cnoc_mailbox_notif_t));
-        notif._.enable = 1;
-        notif._.evt_en = 1;
-        notif._.rm = 1 << __k1_get_cpu_id();
-
-        //! Configuration
-        mppa_noc_cnoc_rx_configuration_t config = { 0 };
-        config.mode = MPPA_NOC_CNOC_RX_MAILBOX;
-        config.init_value = MASK;
-        
-        assert(mppa_noc_cnoc_rx_configure(0, sync_in, config, &notif) == 0);
-    }
-}
-
-void send_signal(uint64_t value)
-{
-    mppa_noc_cnoc_tx_push_eot(0, sync_out, value);
-}
-
-void end(void)
-{
-    mppa_noc_cnoc_rx_free(0, sync_in);
-    mppa_noc_cnoc_tx_free(0, sync_out);
 }

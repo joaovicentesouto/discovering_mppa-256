@@ -1,7 +1,7 @@
-#ifndef MPPA_H_
-#define MPPA_H_
+#ifndef SPAWN_H
+#define SPAWN_H
 
 extern void spawn(void);
 extern void join(void);
 
-#endif /* MPPA_H_ */
+#endif /* SPAWN_H */

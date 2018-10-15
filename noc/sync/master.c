@@ -11,83 +11,37 @@
 #include <mppa_routing.h>
 
 #include <spawn.h>
+#include <noc.h>
 
-//! Sync section
 #define MASK ~0x3F
-
-void init(int tag_rx);
-void sync(int tag_rx);
-void end(int tag_rx);
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **argv)
 {
-        printf(" ====== NoC: Sync 1 ======\n");
-        printf(" Open Sync\n");
+    printf("====== NoC: Sync 1 ======\n");
+    
+    int interface = 0;
+    int tag = 16;
+    
+    printf("Alloc and config Sync\n");
 
-    init(16);
+    cnoc_rx_alloc(interface, tag);
+    cnoc_rx_config(interface, tag, MPPA_NOC_CNOC_RX_BARRIER, MASK);
+
     spawn();
 
-	    printf("Wait 0x%x\n", MASK);
+    printf("Wait\n");
 
-    sync(16);
+    cnoc_rx_wait(interface, tag);
     
-        printf("Sync\n");
+    printf("Done\n");
 
-    end(16);
+    cnoc_rx_free(interface, tag);
 
-        printf("End Sync\n");
+    printf("Join\n");
 
     join();
 
-        printf("Goodbye\n");
+    printf("Goodbye\n");
 
 	return 0;
 };
-
-//! ================ Functions ================
-
-void init(int tag_rx)
-{
-    //! Alloc rx buffer
-    assert(mppa_noc_cnoc_rx_alloc(0, tag_rx) == 0);
-    
-    //! Notification
-    mppa_cnoc_mailbox_notif_t notif;
-    memset(&notif, 0, sizeof(mppa_cnoc_mailbox_notif_t));
-    notif._.enable = 1;
-    notif._.evt_en = 1;
-    notif._.rm = 1 << __k1_get_cpu_id();
-
-    //! Configuration
-    mppa_noc_cnoc_rx_configuration_t config = { 0 };
-    config.mode = MPPA_NOC_CNOC_RX_BARRIER;
-    config.init_value = MASK;
-
-    assert(mppa_noc_cnoc_rx_configure(0, tag_rx, config, &notif) == 0);
-}
-
-void sync(int tag_rx)
-{
-    mppa_noc_wait_clear_event(0, MPPA_NOC_INTERRUPT_LINE_CNOC_RX, tag_rx);
-
-    //! Retrigger
-
-    //! Notification
-    mppa_cnoc_mailbox_notif_t notif;
-    memset(&notif, 0, sizeof(mppa_cnoc_mailbox_notif_t));
-    notif._.enable = 1;
-    notif._.evt_en = 1;
-    notif._.rm = 1 << __k1_get_cpu_id();
-
-    //! Configuration
-    mppa_noc_cnoc_rx_configuration_t config = { 0 };
-    config.mode = MPPA_NOC_CNOC_RX_BARRIER;
-    config.init_value = ~0x3F;
-
-    assert(mppa_noc_cnoc_rx_configure(0, tag_rx, config, &notif) == 0);
-}
-
-void end(int tag_rx)
-{
-    mppa_noc_cnoc_rx_free(0, tag_rx);
-}
