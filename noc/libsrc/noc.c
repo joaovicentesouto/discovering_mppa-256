@@ -32,26 +32,28 @@ unsigned cnoc_tx_alloc_auto(int interface)
     return tag;
 }
 
+#include <stdio.h>
+
 int cnoc_rx_config(int interface, int tag, mppa_noc_cnoc_rx_mode_t mode, uint64_t value)
 {
-    #ifdef _MASTER_
-        unsigned rm_offset = __k1_get_cpu_id();
-    #else
-        unsigned rm_offset = 5;
-    #endif
-
     //! Notification
     mppa_cnoc_mailbox_notif_t notif;
     memset(&notif, 0, sizeof(mppa_cnoc_mailbox_notif_t));
     notif._.enable = 1;
     notif._.evt_en = 1;
-    notif._.rm = 1 << rm_offset;
+
+    #ifdef _MASTER_
+        notif._.rm = 1 << __k1_get_cpu_id();
+    #else
+        notif._.rm = 16;
+    #endif
+
+    printf("offset: %u\n", notif._.rm);
 
     //! Configuration
-    mppa_noc_cnoc_rx_configuration_t config = {
-        .mode = mode,
-        .init_value = value
-    };
+    mppa_noc_cnoc_rx_configuration_t config = { 0 };
+    config.mode = mode;
+    config.init_value = value;
 
     return mppa_noc_cnoc_rx_configure(interface, tag, config, &notif);
 }
@@ -143,10 +145,8 @@ void dnoc_rx_wait(int interface, int tag)
     mppa_noc_dnoc_rx_lac_item_counter(interface, tag);
 }
 
-int dnoc_tx_config(int interface, int tag, int target_tag, int target_cluster)
+int dnoc_tx_config(int interface, int tag, int source_cluster, int target_tag, int target_cluster)
 {
-    int source_cluster = __k1_get_cluster_id();
-
     mppa_dnoc_channel_config_t config = { 0 };
     mppa_dnoc_header_t header = { 0 };
     header._.tag = target_tag;
@@ -155,20 +155,22 @@ int dnoc_tx_config(int interface, int tag, int target_tag, int target_cluster)
     MPPA_NOC_DNOC_TX_CONFIG_INITIALIZER_DEFAULT(config, 0);
 
     assert(mppa_routing_get_dnoc_unicast_route(source_cluster, target_cluster, &config, &header) == 0);
-    
-    mppa_noc_dnoc_tx_flush(interface, tag);
-    __builtin_k1_fence(); //! Wait
+    assert(mppa_noc_dnoc_tx_configure(interface, tag, header, config) == 0); //! == MPPA_NOC_RET_SUCCESS
 
-    return mppa_noc_dnoc_tx_configure(interface, tag, header, config);
+    return 0;
 }
 
 void dnoc_tx_write(int interface, int tag, char * buffer, int size, int offset)
 {
+    mppa_noc_dnoc_tx_flush(interface, tag);
+
     mppa_dnoc_push_offset_t off;
     off._.offset = offset;
     off._.protocol = 0x1; //! absolute offset
     off._.valid = 1;
 
+    __builtin_k1_fence(); //! Wait flush
+ 
     mppa_noc_dnoc_tx_set_push_offset(interface, tag, off);
     mppa_noc_dnoc_tx_send_data(interface, tag, size, buffer);
     mppa_noc_dnoc_tx_flush_eot(interface, tag);

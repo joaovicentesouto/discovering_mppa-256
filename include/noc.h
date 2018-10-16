@@ -34,7 +34,7 @@ extern unsigned dnoc_tx_alloc_auto(int);
 extern int dnoc_rx_config(int, int, char *, int, int);
 extern void dnoc_rx_wait(int, int);
 
-extern int dnoc_tx_config(int, int, int, int);
+extern int dnoc_tx_config(int, int, int, int, int);
 extern void dnoc_tx_write(int, int, char *, int, int);
 
 #endif /* SPAWN_H */

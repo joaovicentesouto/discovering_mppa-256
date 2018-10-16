@@ -28,12 +28,12 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 
     if (id == 1) //! cluster 1
     {
-        printf("Send signal 0x%u\n", MASK_0);
+        printf("Send signal 0x%x\n", MASK_0);
         cnoc_tx_write(interface, tag, MASK_0);
     } 
     else //! cluster 2
     {
-        printf("Send signal 0x%u - 0x%u\n", MASK_1, MASK_2);
+        printf("Send signal 0x%x - 0x%x\n", MASK_1, MASK_2);
         cnoc_tx_write(interface, tag, MASK_1);
         cnoc_tx_write(interface, tag, MASK_2);
     }

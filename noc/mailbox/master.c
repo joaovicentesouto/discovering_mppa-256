@@ -17,11 +17,12 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
     
     int interface = 0;
     int tag = 16;
+    uint64_t init_value = 0;
 
     printf("Alloc and config Mailbox\n");
 
     cnoc_rx_alloc(interface, tag);
-    cnoc_rx_config(interface, tag, MPPA_NOC_CNOC_RX_MAILBOX, 0);
+    cnoc_rx_config(interface, tag, MPPA_NOC_CNOC_RX_MAILBOX, init_value);
 
     spawn();
     

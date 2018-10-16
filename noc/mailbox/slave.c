@@ -16,13 +16,14 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 {
     int id = __k1_get_cluster_id();
     int interface = 0;
-    int tag = 16;
+    int tag;
     int target_tag = 16;
     int target_cluster = 128;
 
     printf("C#: Alloc and config Mailbox\n");
 
-    cnoc_tx_alloc(interface, tag);
+    // cnoc_tx_alloc(interface, tag);
+    tag = cnoc_tx_alloc_auto(interface);
     cnoc_tx_config(interface, tag, id, target_tag, target_cluster);
 
     printf("Send mailbox: %jx\n", (uint64_t) MASK);

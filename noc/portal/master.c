@@ -20,8 +20,8 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
     int tag = 7;
     int size = 11;
     int offset = 0;
-    char buffer[11];
-    memset(buffer, 0, 11);
+    char buffer[size];
+    memset(buffer, 0, size);
     
     printf("Alloc and config Portal\n");
 

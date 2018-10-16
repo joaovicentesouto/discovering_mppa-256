@@ -10,8 +10,7 @@
 
 #include <noc.h>
 
-#define MASK ~0x0
-
+#define MASK ~0x1
 int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
 {
     int interface_in = 0;
@@ -28,12 +27,10 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 
     int tag_out = cnoc_tx_alloc_auto(interface_out);
 
-    uint64_t value = 1 << (id == 1 ? 0 : 1);
-    
-    printf("Send signal %jx\n", value);
+    printf("Send signal %x\n", id == 1 ? 0x1 : 0x2);
 
     cnoc_tx_config(interface_out, tag_out, id, target_tag, target_cluster);
-    cnoc_tx_write(interface_out, tag_out, value);
+    cnoc_tx_write(interface_out, tag_out, id == 1 ? 0x1 : 0x2);
 
     printf("Wait\n");
 
