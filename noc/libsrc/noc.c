@@ -55,7 +55,7 @@ int cnoc_rx_config(int interface, int tag, mppa_noc_cnoc_rx_mode_t mode, uint64_
 
     printf("V: %jx  --- rm: %x\n", value, notif._.rm);
 
-    return mppa_noc_cnoc_rx_configure(interface, tag, config, &notif);
+    return mppa_noc_cnoc_rx_configure(interface, tag, config, NULL);
 }
 
 int cnoc_tx_config(int interface, int source_tag, int source_cluster, int target_tag, int target_cluster)
