@@ -6,7 +6,7 @@
 export BINDIR=bin
 export K1DIR=/usr/local/k1tools/bin
 
-for kernel in mailbox_interface_exec; # mailbox_2_exec; #sync_2_exec; # portal_exec portal_2_exec; sync_exec
+for kernel in sync_2_exec; #mailbox_interface_exec; # mailbox_2_exec; #sync_2_exec; # portal_exec portal_2_exec; sync_exec
 do
 	echo " "
 	echo "  ========== Running Kernel ==========  "

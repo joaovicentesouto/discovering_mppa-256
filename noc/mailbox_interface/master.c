@@ -57,7 +57,7 @@ void another_core_function(void)
 {
     printf("====== 1 NoC: Mailbox: Diff Interface Test ======\n");
     
-    int interface = 0;
+    int interface = 1;
     int tag = 16;
     uint64_t init_value = 0;
 

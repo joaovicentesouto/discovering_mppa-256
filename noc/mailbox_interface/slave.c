@@ -17,7 +17,7 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
     int id = __k1_get_cluster_id();
     int interface = 1;
     int tag;
-    int target_tag = 16;
+    int target_tag = 7;
     int target_cluster = 128;
 
     printf("C#: Alloc and config Mailbox\n");
@@ -30,8 +30,8 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
     
     cnoc_tx_write(interface, tag, MASK);
 
-    target_tag = 7;
-    // target_cluster = 129;
+    target_tag = 16;
+    target_cluster = 129;
     cnoc_tx_config(interface, tag, id, target_tag, target_cluster);
 
     printf("Send mailbox: %jx to %d\n", (uint64_t) MASK, target_cluster);

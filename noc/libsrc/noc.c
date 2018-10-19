@@ -48,14 +48,14 @@ int cnoc_rx_config(int interface, int tag, mppa_noc_cnoc_rx_mode_t mode, uint64_
     notif._.evt_en = 1;
 
     #ifdef _MASTER_
-        notif._.rm = 1 << __k1_get_cpu_id();
+        notif._.rm = 1 << interface;
     #else
         notif._.rm = 1;
     #endif
 
     printf("V: %jx  --- rm: %x\n", value, notif._.rm);
 
-    return mppa_noc_cnoc_rx_configure(interface, tag, config, NULL);
+    return mppa_noc_cnoc_rx_configure(interface, tag, config, &notif);
 }
 
 int cnoc_tx_config(int interface, int source_tag, int source_cluster, int target_tag, int target_cluster)
