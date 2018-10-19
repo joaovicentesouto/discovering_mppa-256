@@ -9,7 +9,7 @@ export LIBSRCDIR = $(CURDIR)/libsrc
 export K1_TOOLCHAIN_DIR = /usr/local/k1tools
 
 # Builds all kernels.
-all: cmd_sync cmd_sync_2 cmd_portal cmd_portal_2 cmd_mailbox
+all: cmd_mailbox_interface cmd_mailbox_2 #cmd_sync cmd_sync_2 cmd_portal cmd_portal_2 cmd_mailbox cmd_mailbox_interface cmd_mailbox_2
 
 # Builds sync kernel.
 cmd_sync:
@@ -35,6 +35,16 @@ cmd_portal_2:
 cmd_mailbox:
 	cd mailbox && $(MAKE) all
 	cp mailbox/output/bin/*.img $(BINDIR)
+
+# Builds mailbox kernel.
+cmd_mailbox_2:
+	cd mailbox_2 && $(MAKE) all
+	cp mailbox_2/output/bin/*.img $(BINDIR)
+
+# Builds mailbox kernel.
+cmd_mailbox_interface:
+	cd mailbox_interface && $(MAKE) all
+	cp mailbox_interface/output/bin/*.img $(BINDIR)
 
 clean:
 	rm -rf sync/output

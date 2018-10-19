@@ -36,6 +36,11 @@ unsigned cnoc_tx_alloc_auto(int interface)
 
 int cnoc_rx_config(int interface, int tag, mppa_noc_cnoc_rx_mode_t mode, uint64_t value)
 {
+    //! Configuration
+    mppa_noc_cnoc_rx_configuration_t config = { 0 };
+    config.mode = mode;
+    config.init_value = value;
+    
     //! Notification
     mppa_cnoc_mailbox_notif_t notif;
     memset(&notif, 0, sizeof(mppa_cnoc_mailbox_notif_t));
@@ -45,17 +50,12 @@ int cnoc_rx_config(int interface, int tag, mppa_noc_cnoc_rx_mode_t mode, uint64_
     #ifdef _MASTER_
         notif._.rm = 1 << __k1_get_cpu_id();
     #else
-        notif._.rm = 16;
+        notif._.rm = 1;
     #endif
 
-    printf("offset: %u\n", notif._.rm);
+    printf("V: %jx  --- rm: %x\n", value, notif._.rm);
 
-    //! Configuration
-    mppa_noc_cnoc_rx_configuration_t config = { 0 };
-    config.mode = mode;
-    config.init_value = value;
-
-    return mppa_noc_cnoc_rx_configure(interface, tag, config, &notif);
+    return mppa_noc_cnoc_rx_configure(interface, tag, config, NULL);
 }
 
 int cnoc_tx_config(int interface, int source_tag, int source_cluster, int target_tag, int target_cluster)
