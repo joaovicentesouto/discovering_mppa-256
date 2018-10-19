@@ -40,24 +40,22 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
     cnoc_rx_free(interface_in, tag_in);
 
     printf("5Wait\n");
-    int tag_out_1 = 10;
-    cnoc_tx_alloc(interface_out_1, tag_out_1);
+    int tag_out_1 = cnoc_tx_alloc_auto(interface_out_1);
 
     printf("4Wait\n");
-    int tag_out_2 = 11;
-    cnoc_tx_alloc(interface_out_2, tag_out_2);
+    int tag_out_2 = cnoc_tx_alloc_auto(interface_out_2);
     
 
     printf("3Wait\n");
     printf("Send signal\n");
 
     target_cluster = 1;
-    assert(cnoc_tx_config(interface_out_1, tag_out_1, id, target_tag, target_cluster) == MPPA_NOC_RET_SUCCESS);
+    assert(cnoc_tx_config(interface_out_1, tag_out_1, 128, target_tag, target_cluster) == MPPA_NOC_RET_SUCCESS);
     cnoc_tx_write(interface_out_1, tag_out_1, 0x1);
 
     
     target_cluster = 2;
-    assert(cnoc_tx_config(interface_out_2, tag_out_2, id, target_tag, target_cluster) == MPPA_NOC_RET_SUCCESS);
+    assert(cnoc_tx_config(interface_out_2, tag_out_2, 129, target_tag, target_cluster) == MPPA_NOC_RET_SUCCESS);
     cnoc_tx_write(interface_out_2, tag_out_2, 0x1);
 
     printf("Join\n");
