@@ -17,13 +17,15 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
 {
     printf("====== NoC Sync: 2 Clusters wait 1 IO ======\n");
 
+    int tag_in = 16;
     int interface_in = 0;
+    int tag_out_1 = 0;
+    int tag_out_2 = 0;
     int interface_out_1 = 0;
     int interface_out_2 = 1;
-    int tag_in = 16;
     int id = 128;
     int target_cluster;
-    int target_tag = 0;
+    int target_tag = 24;
     
     printf("Alloc and config Syncs: mask %04x\n", MASK);
 
@@ -35,23 +37,21 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
     printf("Wait 1\n");
 
     cnoc_rx_wait(interface_in, tag_in);
-
-    printf("Wait 2\n");
     cnoc_rx_free(interface_in, tag_in);
 
-    printf("Wait 3\n");
-    int tag_out_1 = cnoc_tx_alloc_auto(interface_out_1);
+    printf("Wait 2\n");
+    cnoc_tx_alloc(interface_out_1, tag_out_1);
 
     printf("Wait 4\n");
-    int tag_out_2 = cnoc_tx_alloc_auto(interface_out_2);
+    cnoc_tx_alloc(interface_out_2, tag_out_2);
     
-    printf("Send signal\n");
+    printf("Send signal 1\n");
 
     target_cluster = 1;
     assert(cnoc_tx_config(interface_out_1, tag_out_1, 128, target_tag, target_cluster) == MPPA_NOC_RET_SUCCESS);
+    printf("Send signal 2\n");
     cnoc_tx_write(interface_out_1, tag_out_1, 0x1);
 
-    
     target_cluster = 2;
     assert(cnoc_tx_config(interface_out_2, tag_out_2, 129, target_tag, target_cluster) == MPPA_NOC_RET_SUCCESS);
     cnoc_tx_write(interface_out_2, tag_out_2, 0x1);

@@ -16,7 +16,7 @@
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **argv)
 {
-    printf("====== NoC Mailbox: 1 IO to 1 Cluster ======\n");
+    printf("====== NoC Mailbox: 1 IO to 2 Clusters ======\n");
     
     int id_1 = 128;
     int id_2 = 129;

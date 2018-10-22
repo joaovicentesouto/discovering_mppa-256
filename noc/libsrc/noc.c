@@ -63,10 +63,17 @@ int cnoc_tx_config(int interface, int source_tag, int source_cluster, int target
     mppa_cnoc_config_t config = { 0 };
     mppa_cnoc_header_t header = { 0 };
 
+
+    printf("%d: Route\n", source_cluster);
     mppa_routing_get_cnoc_unicast_route(source_cluster, target_cluster, &config, &header);
     header._.tag = target_tag;
 
-    return mppa_noc_cnoc_tx_configure(interface, source_tag, config, header);
+    printf("%d: Config\n", source_cluster);
+    int ret = mppa_noc_cnoc_tx_configure(interface, source_tag, config, header);
+
+
+    printf("%d: Win\n", source_cluster);
+    return ret;
 }
 
 void cnoc_rx_wait(int interface, int tag)
