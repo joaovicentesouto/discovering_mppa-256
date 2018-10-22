@@ -41,19 +41,19 @@ int cnoc_rx_config(int interface, int tag, mppa_noc_cnoc_rx_mode_t mode, uint64_
     config.mode = mode;
     config.init_value = value;
     
-    //! Notification
-    mppa_cnoc_mailbox_notif_t notif;
-    memset(&notif, 0, sizeof(mppa_cnoc_mailbox_notif_t));
-    notif._.enable = 1;
-    notif._.evt_en = 1;
+    // //! Notification
+    // mppa_cnoc_mailbox_notif_t notif;
+    // memset(&notif, 0, sizeof(mppa_cnoc_mailbox_notif_t));
+    // notif._.enable = 1;
+    // notif._.evt_en = 1;
 
-    #ifdef _MASTER_
-        notif._.rm = 1 << interface;
-    #else
-        notif._.rm = 1;
-    #endif
+    // #ifdef _MASTER_
+    //     notif._.rm = 1 << interface;
+    // #else
+    //     notif._.rm = 1;
+    // #endif
 
-    printf("V: %jx  --- rm: %x\n", value, notif._.rm);
+    // printf("V: %jx  --- rm: %x\n", value, notif._.rm);
 
     return mppa_noc_cnoc_rx_configure(interface, tag, config, NULL);
 }

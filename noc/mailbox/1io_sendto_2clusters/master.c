@@ -16,11 +16,16 @@
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **argv)
 {
-    printf("====== NoC: Mailbox 2 ======\n");
+    printf("====== NoC Mailbox: 1 IO to 1 Cluster ======\n");
     
-    int id = 128;
-    int interface_in = 0, interface_out = 0;
-    int tag_in = 7, tag_out;
+    int id_1 = 128;
+    int id_2 = 129;
+    int tag_in = 7;
+    int interface_in = 0;
+    int tag_out_1;
+    int tag_out_2;
+    int interface_out_1 = 0;
+    int interface_out_2 = 1;
     int target_tag = 16;
     int target_cluster;
 
@@ -29,7 +34,8 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
     assert(cnoc_rx_alloc(interface_in, tag_in) == 0);
     assert(cnoc_rx_config(interface_in, tag_in, MPPA_NOC_CNOC_RX_BARRIER, MASK) == 0);
 
-    tag_out = cnoc_tx_alloc_auto(interface_out);
+    tag_out_1 = cnoc_tx_alloc_auto(interface_out_1);
+    tag_out_2 = cnoc_tx_alloc_auto(interface_out_2);
 
     spawn();
 
@@ -40,17 +46,18 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
     printf("Send mailbox: %jx\n", (uint64_t) MSG);
 
     target_cluster = 1;    
-    cnoc_tx_config(interface_out, tag_out, id, target_tag, target_cluster);
-    cnoc_tx_write(interface_out, tag_out, MSG);
+    cnoc_tx_config(interface_out_1, tag_out_1, id_1, target_tag, target_cluster);
+    cnoc_tx_write(interface_out_1, tag_out_1, MSG);
 
     target_cluster = 2;    
-    cnoc_tx_config(interface_out, tag_out, id, target_tag, target_cluster);
-    cnoc_tx_write(interface_out, tag_out, MSG);
+    cnoc_tx_config(interface_out_2, tag_out_2, id_2, target_tag, target_cluster);
+    cnoc_tx_write(interface_out_2, tag_out_2, MSG);
 
     printf("Done\n");
 
-    cnoc_rx_free(interface_out, tag_in);
-    cnoc_tx_free(interface_out, tag_in);
+    cnoc_rx_free(interface_in, tag_in);
+    cnoc_tx_free(interface_out_1, tag_out_1);
+    cnoc_tx_free(interface_out_2, tag_out_2);
 
     join();
 

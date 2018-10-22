@@ -1,34 +1,22 @@
 #
 # Copyright(C) 2014 Pedro H. Penna <pedrohenriquepenna@gmail.com>
 #
+# Builds CAP Benchmark suite for MPPA-256 architecture.
+#
 
-# Executable.
-EXEC = sync_exec
+# Builds all kernels.
+all: cmd_1io_wait_2clusters cmd_2clusters_wait_1io
 
-# Use bare libraries
-system-name := bare
+# Builds sync kernel.
+cmd_1io_wait_2clusters:
+	cd 1io_wait_2clusters && $(MAKE) all
+	cp 1io_wait_2clusters/output/bin/*.img $(BINDIR)
 
-# Compilation flags.
-cflags := -fopenmp -O3 -std=gnu99 -g -mhypervisor -Wall -Wextra -Winit-self -Wswitch-default -Wfloat-equal -Wundef -Wshadow -Wuninitialized #Werror
-MPPAFlags := -g -lvbsp -lmppaipc -lutask -lgomp -lmppa_remote -lmppa_async -lmppa_request_engine -lmppapower -lmppanoc -lmpparouting -mhypervisor -Wl,--defsym=_LIBNOC_DISABLE_FIFO_FULL_CHECK=0
+# Builds another sync kernel.
+cmd_2clusters_wait_1io:
+	cd 2clusters_wait_1io && $(MAKE) all
+	cp 2clusters_wait_1io/output/bin/*.img $(BINDIR)
 
-# Builds master binary.
-io-bin := master
-master-cflags := -D_MASTER_ -D_NOC_ -I $(INCDIR)
-master-lflags := $(MPPAFlags) -lpcie_queue 
-master-srcs := master.c $(wildcard $(LIBSRCDIR)/*.c)
-
-# Builds slave binary.
-cluster-bin := slave
-cluster-system := $(cluster_system)
-cluster-cflags := -D_NOC_ -I $(INCDIR)
-cluster-lflags := $(MPPAFlags)
-slave-srcs := slave.c $(LIBSRCDIR)/noc.c
-
-# Builds image (master + slave)
-mppa-bin := multibin_bin
-multibin_bin-objs := master slave
-multibin_bin-name := $(EXEC).img
-
-# must be at the end of the makefile!
-include $(K1_TOOLCHAIN_DIR)/share/make/Makefile.kalray
+clean:
+	rm -rf 1io_wait_2clusters/output
+	rm -rf 2clusters_wait_1io/output

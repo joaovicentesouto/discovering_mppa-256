@@ -15,7 +15,7 @@
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **argv)
 {
-    printf("====== NoC: Sync 2 ======\n");
+    printf("====== NoC Sync: 2 Clusters wait 1 IO ======\n");
 
     int interface_in = 0;
     int interface_out_1 = 0;

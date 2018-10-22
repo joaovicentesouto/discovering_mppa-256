@@ -16,7 +16,7 @@ void another_core_function(void);
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **argv)
 {
-    printf("====== NoC: Mailbox: Diff Interface Test ======\n");
+    printf("====== NoC Mailbox: 1 Cluster to 2 IO ======\n");
     
     utask_t t;
 	utask_create(&t, NULL, (void*)another_core_function, NULL);

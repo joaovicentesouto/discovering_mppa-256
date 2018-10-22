@@ -1,8 +1,10 @@
+
 // #include <mppaipc.h>
-#include <stdint.h>
 #include <mppa/osconfig.h>
 #include <stdio.h>
 #include <assert.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 #include <mppa_power.h>
 #include <mppa_noc.h>
@@ -11,31 +13,31 @@
 #include <spawn.h>
 #include <noc.h>
 
+#define MASK ~0x3F
+
 int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **argv)
 {
-    printf("====== NoC: Mailbox ======\n");
+    printf("====== NoC Sync: 1 IO wait 2 Clusters ======\n");
     
     int interface = 0;
     int tag = 16;
-    uint64_t init_value = 0;
-
-    printf("Alloc and config Mailbox\n");
+    
+    printf("Alloc and config Sync\n");
 
     cnoc_rx_alloc(interface, tag);
-    cnoc_rx_config(interface, tag, MPPA_NOC_CNOC_RX_MAILBOX, init_value);
+    cnoc_rx_config(interface, tag, MPPA_NOC_CNOC_RX_BARRIER, MASK);
 
     spawn();
-    
-    printf("Recive mailbox\n");
+
+    printf("Wait\n");
 
     cnoc_rx_wait(interface, tag);
-    uint64_t mailbox = cnoc_rx_read(interface, tag);
-
-    printf("Msg: %jx\n", mailbox);
+    
+    printf("Done\n");
 
     cnoc_rx_free(interface, tag);
 
-    printf("Done\n");
+    printf("Join\n");
 
     join();
 

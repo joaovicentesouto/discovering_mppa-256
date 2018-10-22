@@ -3,7 +3,7 @@
 #
 
 # Executable.
-EXEC = portal_2_exec
+EXEC = portal_2c_to_1io_exec
 
 # Use bare libraries
 system-name := bare

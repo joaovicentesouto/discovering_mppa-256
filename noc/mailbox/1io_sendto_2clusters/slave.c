@@ -14,11 +14,13 @@
 
 int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
 {
-    int interface_in = 0, interface_out = 0xFFFF;
-    int tag_in = 16, tag_out;
-    int target_cluster = 128;
-    int target_tag = 7;
     int id = __k1_get_cluster_id();
+    int tag_in = 16;
+    int interface_in = 0;
+    int tag_out;
+    int interface_out = 0;
+    int target_tag = 7;
+    int target_cluster = 128;
 
     printf("C#: Alloc and config Sync 9999\n");
 

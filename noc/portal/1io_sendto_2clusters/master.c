@@ -16,7 +16,7 @@
 
 int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
 {
-    printf("====== NoC: Portal 2 ======\n");
+    printf("====== NoC Portal: 1 IO to 2 Cluster ======\n");
     
     int id = 128;
     int interface_in = 0;

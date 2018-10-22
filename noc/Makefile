@@ -9,46 +9,21 @@ export LIBSRCDIR = $(CURDIR)/libsrc
 export K1_TOOLCHAIN_DIR = /usr/local/k1tools
 
 # Builds all kernels.
-all: cmd_sync_2 cmd_mailbox_interface cmd_mailbox_2 #cmd_sync cmd_sync_2 cmd_portal cmd_portal_2 cmd_mailbox cmd_mailbox_interface cmd_mailbox_2
+all: cmd_sync cmd_portal cmd_mailbox
 
 # Builds sync kernel.
 cmd_sync:
 	cd sync && $(MAKE) all
-	cp sync/output/bin/*.img $(BINDIR)
-
-# Builds another sync kernel.
-cmd_sync_2:
-	cd sync_2 && $(MAKE) all
-	cp sync_2/output/bin/*.img $(BINDIR)
 
 # Builds portal kernel.
 cmd_portal:
 	cd portal && $(MAKE) all
-	cp portal/output/bin/*.img $(BINDIR)
-
-# Builds another portal kernel.
-cmd_portal_2:
-	cd portal_2 && $(MAKE) all
-	cp portal_2/output/bin/*.img $(BINDIR)
 
 # Builds mailbox kernel.
 cmd_mailbox:
 	cd mailbox && $(MAKE) all
-	cp mailbox/output/bin/*.img $(BINDIR)
-
-# Builds mailbox kernel.
-cmd_mailbox_2:
-	cd mailbox_2 && $(MAKE) all
-	cp mailbox_2/output/bin/*.img $(BINDIR)
-
-# Builds mailbox kernel.
-cmd_mailbox_interface:
-	cd mailbox_interface && $(MAKE) all
-	cp mailbox_interface/output/bin/*.img $(BINDIR)
 
 clean:
-	rm -rf sync/output
-	rm -rf sync_2/output
-	rm -rf portal/output
-	rm -rf portal_2/output
-	rm -rf mailbox/output
+	cd sync && $(MAKE) clean
+	cd portal && $(MAKE) clean
+	cd mailbox && $(MAKE) clean
