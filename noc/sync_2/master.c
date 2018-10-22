@@ -23,7 +23,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
     int tag_in = 16;
     int id = 128;
     int target_cluster;
-    int target_tag = 32;
+    int target_tag = 0;
     
     printf("Alloc and config Syncs: mask %04x\n", MASK);
 
@@ -32,21 +32,19 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
 
     spawn();
 
-    printf("Wait\n");
+    printf("Wait 1\n");
 
     cnoc_rx_wait(interface_in, tag_in);
 
-    printf("5Wait\n");
+    printf("Wait 2\n");
     cnoc_rx_free(interface_in, tag_in);
 
-    printf("5Wait\n");
+    printf("Wait 3\n");
     int tag_out_1 = cnoc_tx_alloc_auto(interface_out_1);
 
-    printf("4Wait\n");
+    printf("Wait 4\n");
     int tag_out_2 = cnoc_tx_alloc_auto(interface_out_2);
     
-
-    printf("3Wait\n");
     printf("Send signal\n");
 
     target_cluster = 1;

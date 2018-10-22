@@ -15,7 +15,7 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 {
     int interface_in = 0;
     int interface_out = 1;
-    int tag_in = 32;
+    int tag_in = 0;
     int id = __k1_get_cluster_id();
     int target_cluster = 128;
     int target_tag = 16;
