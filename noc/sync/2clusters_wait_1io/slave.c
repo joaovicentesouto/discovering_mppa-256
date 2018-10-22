@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <mppa/osconfig.h>
 #include <stdio.h>
-#include <assert.h>
 
 #include <mppa_power.h>
 #include <mppa_noc.h>
@@ -21,8 +20,8 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
     
     printf("C#: Alloc and config Syncs: %d\n", tag_in);
 
-    assert(cnoc_rx_alloc(interface, tag_in) == 0);
-    assert(cnoc_rx_config(interface, tag_in, MPPA_NOC_CNOC_RX_BARRIER, MASK) == 0);
+    cnoc_rx_alloc(interface, tag_in);
+    cnoc_rx_config(interface, tag_in, MPPA_NOC_CNOC_RX_BARRIER, MASK);
 
     int tag_out = cnoc_tx_alloc_auto(interface);
 

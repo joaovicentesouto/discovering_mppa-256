@@ -1,7 +1,6 @@
 // #include <mppaipc.h>
 #include <mppa/osconfig.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdint.h>
 #include <inttypes.h>
 

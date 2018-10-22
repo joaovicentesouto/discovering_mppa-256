@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <mppa/osconfig.h>
 #include <stdio.h>
-#include <assert.h>
 
 #include <mppa_power.h>
 #include <mppa_noc.h>

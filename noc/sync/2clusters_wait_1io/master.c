@@ -1,7 +1,6 @@
 // #include <mppaipc.h>
 #include <mppa/osconfig.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdint.h>
 
 #include <mppa_power.h>
@@ -48,12 +47,12 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
     printf("Send signal 1\n");
 
     target_cluster = 1;
-    assert(cnoc_tx_config(interface_out_1, tag_out_1, 128, target_tag, target_cluster) == MPPA_NOC_RET_SUCCESS);
+    cnoc_tx_config(interface_out_1, tag_out_1, 128, target_tag, target_cluster);
     printf("Send signal 2\n");
     cnoc_tx_write(interface_out_1, tag_out_1, 0x1);
 
     target_cluster = 2;
-    assert(cnoc_tx_config(interface_out_2, tag_out_2, 129, target_tag, target_cluster) == MPPA_NOC_RET_SUCCESS);
+    cnoc_tx_config(interface_out_2, tag_out_2, 129, target_tag, target_cluster);
     cnoc_tx_write(interface_out_2, tag_out_2, 0x1);
 
     printf("Join\n");

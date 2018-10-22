@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <mppa/osconfig.h>
 #include <stdio.h>
-#include <assert.h>
 
 #include <mppa_power.h>
 #include <mppa_noc.h>
@@ -31,8 +30,8 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
 
     printf("C#: Alloc and config Mailbox\n");
 
-    assert(cnoc_rx_alloc(interface_in, tag_in) == 0);
-    assert(cnoc_rx_config(interface_in, tag_in, MPPA_NOC_CNOC_RX_BARRIER, MASK) == 0);
+    cnoc_rx_alloc(interface_in, tag_in);
+    cnoc_rx_config(interface_in, tag_in, MPPA_NOC_CNOC_RX_BARRIER, MASK);
 
     tag_out_1 = cnoc_tx_alloc_auto(interface_out_1);
     tag_out_2 = cnoc_tx_alloc_auto(interface_out_2);

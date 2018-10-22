@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <mppa/osconfig.h>
 #include <stdio.h>
-#include <assert.h>
 
 #include <mppa_power.h>
 #include <mppa_noc.h>
@@ -28,8 +27,8 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
     printf("Alloc and config Mailbox\n");
 
 
-    assert(cnoc_rx_alloc(interface, tag) == 0);
-    assert(cnoc_rx_config(interface, tag, MPPA_NOC_CNOC_RX_MAILBOX, init_value) == 0);
+    cnoc_rx_alloc(interface, tag);
+    cnoc_rx_config(interface, tag, MPPA_NOC_CNOC_RX_MAILBOX, init_value);
 
     spawn();
     
@@ -63,8 +62,8 @@ void another_core_function(void)
 
     printf("1 Alloc and config Mailbox\n");
 
-    assert(cnoc_rx_alloc(interface, tag) == 0);
-    assert(cnoc_rx_config(interface, tag, MPPA_NOC_CNOC_RX_MAILBOX, init_value) == 0);
+    cnoc_rx_alloc(interface, tag);
+    cnoc_rx_config(interface, tag, MPPA_NOC_CNOC_RX_MAILBOX, init_value);
 
     // spawn();
     

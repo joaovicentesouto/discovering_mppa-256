@@ -1,7 +1,6 @@
 // #include <mppaipc.h>
 #include <mppa/osconfig.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdint.h>
 #include <inttypes.h>
 
@@ -18,9 +17,11 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 {
     printf("====== NoC Portal: 1 IO to 2 Clusters ======\n");
     
-    int id = 128;
+    int id_1 = 128;
+    int id_2 = 129;
     int interface_in = 0;
-    int interface_out = 0;
+    int interface_out_1 = 0;
+    int interface_out_2 = 1;
     int tag_in = 7;
     int target_tag = 7;
     int target_cluster;
@@ -33,7 +34,7 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
     cnoc_rx_alloc(interface_in, tag_in);
     cnoc_rx_config(interface_in, tag_in, MPPA_NOC_CNOC_RX_BARRIER, MASK);
 
-    int tag_out = dnoc_tx_alloc_auto(interface_out);
+    int tag_out = dnoc_tx_alloc_auto(interface_out_1);
 
     spawn();
 
@@ -45,18 +46,18 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
     printf("Send to cluster 1: %s\n", buff_1);
 
     target_cluster = 1;
-    dnoc_tx_config(interface_out, tag_out, id, target_tag, target_cluster);
-    dnoc_tx_write(interface_out, tag_out, buff_1, 4, 0);
+    dnoc_tx_config(interface_out_1, tag_out, id_1, target_tag, target_cluster);
+    dnoc_tx_write(interface_out_1, tag_out, buff_1, 4, 0);
 
     sprintf(buff_2, "C____2\0");
     printf("Send to cluster 2: %s\n", buff_2);
 
     target_cluster = 2;
-    dnoc_tx_config(interface_out, tag_out, id, target_tag, target_cluster);
-    dnoc_tx_write(interface_out, tag_out, buff_2, 7, 0);
+    dnoc_tx_config(interface_out_1, tag_out, id_1, target_tag, target_cluster);
+    dnoc_tx_write(interface_out_1, tag_out, buff_2, 7, 0);
 
     cnoc_rx_free(interface_in, tag_in);
-    dnoc_tx_free(interface_out, tag_out);
+    dnoc_tx_free(interface_out_1, tag_out);
 
     printf("Done\n");
 

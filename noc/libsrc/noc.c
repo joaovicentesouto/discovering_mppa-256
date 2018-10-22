@@ -1,12 +1,13 @@
 #include <stdint.h>
 #include <mppa_noc.h>
 #include <mppa_routing.h>
+#include <stdio.h>
 
 //! Control NoC
 
-int cnoc_rx_alloc(int interface, int tag)
+void cnoc_rx_alloc(int interface, int tag)
 {
-    return mppa_noc_cnoc_rx_alloc(interface, tag);
+    assert(mppa_noc_cnoc_rx_alloc(interface, tag) == 0);
 }
 
 void cnoc_rx_free(int interface, int tag)
@@ -14,9 +15,9 @@ void cnoc_rx_free(int interface, int tag)
     mppa_noc_cnoc_rx_free(interface, tag);
 }
 
-int cnoc_tx_alloc(int interface, int tag)
+void cnoc_tx_alloc(int interface, int tag)
 {
-    return mppa_noc_cnoc_tx_alloc(interface, tag);
+    assert(mppa_noc_cnoc_tx_alloc(interface, tag) == 0);
 }
 
 void cnoc_tx_free(int interface, int tag)
@@ -32,9 +33,7 @@ unsigned cnoc_tx_alloc_auto(int interface)
     return tag;
 }
 
-#include <stdio.h>
-
-int cnoc_rx_config(int interface, int tag, mppa_noc_cnoc_rx_mode_t mode, uint64_t value)
+void cnoc_rx_config(int interface, int tag, mppa_noc_cnoc_rx_mode_t mode, uint64_t value)
 {
     //! Configuration
     mppa_noc_cnoc_rx_configuration_t config = { 0 };
@@ -55,25 +54,18 @@ int cnoc_rx_config(int interface, int tag, mppa_noc_cnoc_rx_mode_t mode, uint64_
 
     // printf("V: %jx  --- rm: %x\n", value, notif._.rm);
 
-    return mppa_noc_cnoc_rx_configure(interface, tag, config, NULL);
+    assert(mppa_noc_cnoc_rx_configure(interface, tag, config, NULL) == 0);
 }
 
-int cnoc_tx_config(int interface, int source_tag, int source_cluster, int target_tag, int target_cluster)
+void cnoc_tx_config(int interface, int source_tag, int source_cluster, int target_tag, int target_cluster)
 {
     mppa_cnoc_config_t config = { 0 };
     mppa_cnoc_header_t header = { 0 };
-
-
-    printf("%d: Route\n", source_cluster);
+    
     mppa_routing_get_cnoc_unicast_route(source_cluster, target_cluster, &config, &header);
     header._.tag = target_tag;
 
-    printf("%d: Config\n", source_cluster);
-    int ret = mppa_noc_cnoc_tx_configure(interface, source_tag, config, header);
-
-
-    printf("%d: Win\n", source_cluster);
-    return ret;
+    assert(mppa_noc_cnoc_tx_configure(interface, source_tag, config, header) == 0);
 }
 
 void cnoc_rx_wait(int interface, int tag)
@@ -93,9 +85,9 @@ void cnoc_tx_write(int interface, int tag, uint64_t value)
 
 //! Data NoC
 
-int dnoc_rx_alloc(int interface, int tag)
+void dnoc_rx_alloc(int interface, int tag)
 {
-    return mppa_noc_dnoc_rx_alloc(interface, tag);
+    assert(mppa_noc_dnoc_rx_alloc(interface, tag) == 0);
 }
 
 void dnoc_rx_free(int interface, int tag)
@@ -103,9 +95,9 @@ void dnoc_rx_free(int interface, int tag)
     mppa_noc_dnoc_rx_free(interface, tag);
 }
 
-int dnoc_tx_alloc(int interface, int tag)
+void dnoc_tx_alloc(int interface, int tag)
 {
-    return mppa_noc_dnoc_tx_alloc(interface, tag);
+    assert(mppa_noc_dnoc_tx_alloc(interface, tag) == 0);
 }
 
 void dnoc_tx_free(int interface, int tag)
@@ -121,7 +113,7 @@ unsigned dnoc_tx_alloc_auto(int interface)
     return tag;
 }
 
-int dnoc_rx_config(int interface, int tag, char * buffer, int size, int offset)
+void dnoc_rx_config(int interface, int tag, char * buffer, int size, int offset)
 {
     mppa_noc_dnoc_rx_configuration_t config = {
         .buffer_base = (uintptr_t) buffer,
@@ -136,12 +128,9 @@ int dnoc_rx_config(int interface, int tag, char * buffer, int size, int offset)
         .counter_id = 0
     };
 
-    if(mppa_noc_dnoc_rx_configure(interface, tag, config) != 0)
-        return -1;
+    assert(mppa_noc_dnoc_rx_configure(interface, tag, config) == 0);
 
     mppa_noc_dnoc_rx_lac_event_counter(interface, tag);
-
-    return 0;
 }
 
 void dnoc_rx_wait(int interface, int tag)
@@ -152,7 +141,7 @@ void dnoc_rx_wait(int interface, int tag)
     mppa_noc_dnoc_rx_lac_item_counter(interface, tag);
 }
 
-int dnoc_tx_config(int interface, int tag, int source_cluster, int target_tag, int target_cluster)
+void dnoc_tx_config(int interface, int tag, int source_cluster, int target_tag, int target_cluster)
 {
     mppa_dnoc_channel_config_t config = { 0 };
     mppa_dnoc_header_t header = { 0 };
@@ -163,8 +152,6 @@ int dnoc_tx_config(int interface, int tag, int source_cluster, int target_tag, i
 
     assert(mppa_routing_get_dnoc_unicast_route(source_cluster, target_cluster, &config, &header) == 0);
     assert(mppa_noc_dnoc_tx_configure(interface, tag, header, config) == 0); //! == MPPA_NOC_RET_SUCCESS
-
-    return 0;
 }
 
 void dnoc_tx_write(int interface, int tag, char * buffer, int size, int offset)
