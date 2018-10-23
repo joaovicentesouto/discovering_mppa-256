@@ -169,3 +169,23 @@ void dnoc_tx_write(int interface, int tag, char * buffer, int size, int offset)
     mppa_noc_dnoc_tx_send_data(interface, tag, size, buffer);
     mppa_noc_dnoc_tx_flush_eot(interface, tag);
 }
+
+//! UC NoC
+
+void dnoc_uc_alloc(int interface, int tag)
+{
+    assert(mppa_noc_dnoc_uc_alloc(interface, tag) == 0);
+}
+
+int dnoc_uc_alloc_auto(int interface)
+{
+    unsigned tag;
+    assert(mppa_noc_dnoc_uc_alloc_auto(interface, &tag, MPPA_NOC_BLOCKING) == 0);
+    
+    return tag;
+}
+
+void dnoc_uc_free(int interface, int tag)
+{
+    mppa_noc_dnoc_uc_free(interface, tag);
+}
