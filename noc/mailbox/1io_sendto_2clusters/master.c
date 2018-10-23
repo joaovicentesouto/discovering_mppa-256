@@ -17,14 +17,14 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
 {
     printf("====== NoC Mailbox: 1 IO to 2 Clusters ======\n");
     
-    int id_1 = 128;
-    int id_2 = 129;
+    int id_1 = 130;
+    int id_2 = 131;
     int tag_in = 7;
     int interface_in = 0;
     int tag_out_1;
     int tag_out_2;
-    int interface_out_1 = 0;
-    int interface_out_2 = 1;
+    int interface_out_1 = 2;
+    int interface_out_2 = 3;
     int target_tag = 16;
     int target_cluster;
 
@@ -42,11 +42,13 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
 
     cnoc_rx_wait(interface_in, tag_in);
 
-    printf("Send mailbox: %jx\n", (uint64_t) MSG);
+    printf("Send mailbox interface: %d: %jx\n", id_1, (uint64_t) MSG);
 
     target_cluster = 1;    
     cnoc_tx_config(interface_out_1, tag_out_1, id_1, target_tag, target_cluster);
     cnoc_tx_write(interface_out_1, tag_out_1, MSG);
+
+    printf("Send mailbox interface: %d: %jx\n", id_2, (uint64_t) MSG);
 
     target_cluster = 2;    
     cnoc_tx_config(interface_out_2, tag_out_2, id_2, target_tag, target_cluster);
