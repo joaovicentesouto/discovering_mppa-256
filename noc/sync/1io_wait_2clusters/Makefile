@@ -10,7 +10,7 @@ system-name := bare
 
 # Compilation flags.
 cflags := -fopenmp -O3 -std=gnu99 -g -mhypervisor -Wall -Wextra -Winit-self -Wswitch-default -Wfloat-equal -Wundef -Wshadow -Wuninitialized #Werror
-MPPAFlags := -g -lvbsp -lmppaipc -lutask -lgomp -lmppa_remote -lmppa_async -lmppa_request_engine -lmppapower -lmppanoc -lmpparouting -mhypervisor -Wl,--defsym=_LIBNOC_DISABLE_FIFO_FULL_CHECK=0
+MPPAFlags := -g -lutask -lmppapower -lmppanoc -lmpparouting -mhypervisor -Wl,--defsym=_LIBNOC_DISABLE_FIFO_FULL_CHECK=0
 
 # Builds master binary.
 io-bin := master
