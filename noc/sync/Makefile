@@ -5,12 +5,12 @@
 #
 
 # Builds all kernels.
-all: cmd_1io_wait_2clusters cmd_2clusters_wait_1io
+all: cmd_1io_wait_2clusters #cmd_2clusters_wait_1io
 
 # Builds sync kernel.
 cmd_1io_wait_2clusters:
 	cd 1io_wait_2clusters && $(MAKE) all
-	cp 1io_wait_2clusters/output/bin/*.img $(BINDIR)
+	cp 1io_wait_2clusters/*.img $(BINDIR)
 
 # Builds another sync kernel.
 cmd_2clusters_wait_1io:

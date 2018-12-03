@@ -46,55 +46,65 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
     int i = 0;
     printf("Config %d\n", i++);
     //! ====================== UC Config ======================
-    // dnoc_tx_config(interface_out, tag_out, id, target_tag, target_cluster);
 
-    mppa_noc_dnoc_uc_configuration_t uc_config = MPPA_NOC_DNOC_UC_CONFIGURATION_INIT;
-    uc_config.program_start = 0;
+    // Configure the TX (without mOS)
 
-    printf("Config %d\n", i++);
-    mppa_noc_dnoc_uc_set_linear_params(&uc_config, 28, 0, 0);
-    uc_config.buffer_base = (uintptr_t) buffer;
+	mppa_dnoc_channel_config_t config_tx = { 0 };
+	mppa_dnoc_header_t header = { 0 };
+	header._.valid = 1;
+	header._.tag = target_tag;
+  	MPPA_NOC_DNOC_TX_CONFIG_INITIALIZER_DEFAULT(config_tx, 0);
+	config_tx ._.payload_max = 32; // for better performances
 
-    printf("Config %d\n", i++);
-    mppa_noc_dnoc_uc_configure(interface_out, uc_tag, uc_config);
+    if (mppa_routing_get_dnoc_unicast_route(__k1_get_cluster_id(),
+						0, 
+						&config_tx, &header) != 0) {
+	  printf("mppa_routing_get_dnoc_unicast_route failed\n");
+	  return -1;
+	}
+			      
+	mppa_noc_dnoc_tx_configure(interface_out, tx_tag, header, config_tx);
 
-    mppa_dnoc_channel_config_t config = { 0 };
-    mppa_dnoc_header_t header = { 0 };
-    header._.tag = target_tag;
-    header._.valid = 1;
 
-    MPPA_NOC_DNOC_TX_CONFIG_INITIALIZER_DEFAULT(config, 0);
+    // Configure the UC (without mOS)
 
-    printf("Config %d\n", i++);
-    assert(mppa_routing_get_dnoc_unicast_route(id, target_cluster, &config, &header) == 0);
-    
-    printf("Config %d\n", i++);
-    assert(mppa_noc_dnoc_tx_configure(interface_out, tx_tag, header, config) == 0); //! == MPPA_NOC_RET_SUCCESS
+	mppa_noc_dnoc_uc_configuration_t uc_configuration;
+	memset(&uc_configuration, 0, sizeof(uc_configuration));
 
-    mppa_noc_uc_program_run_t program_run = {{ 0 }};
-    program_run.activation = 1;
-    program_run.semaphore = 1; // Set at least one semaphore.
+	uc_configuration.program_start =  
+	  (uintptr_t) mppa_noc_linear_firmware_eot_event;
+	uc_configuration.buffer_base = (uintptr_t) buffer;
+	uc_configuration.buffer_size = sizeof(buffer);
+
+	mppa_noc_dnoc_uc_set_linear_params(&uc_configuration, sizeof(buffer), 0, 0);
+	
+	mppa_noc_dnoc_uc_configure(interface_out, uc_tag, uc_configuration);
+
+
+    // Run the uc program
+
+
+	mppa_noc_uc_program_run_t program_run;
+	memset(&program_run, 0, sizeof(mppa_noc_uc_program_run_t));
+	program_run.semaphore = 1;
+	program_run.activation = 1;
+	mppa_noc_dnoc_uc_set_program_run(interface_out, uc_tag, program_run);
+
+	printf("IO: Sent data via microprogram\n");
 
     //! ==================== UC END Config ====================
 
-    // dnoc_tx_write(interface_out, tag_out, buffer, 4, 0);
-
-
-    printf("Config %d\n", i++);
-    //! ====================== UC Run program ======================
-    mppa_noc_dnoc_uc_set_program_run(interface_out, tx_tag, program_run);
-
     printf("Wait: send to cluster: %s\n", buffer);
     mppa_noc_wait_clear_event(interface_out, MPPA_NOC_INTERRUPT_LINE_DNOC_TX, uc_tag);
+
+    printf("Done\n");
+
+    join();
 
 
     cnoc_rx_free(interface, tag_in);
     dnoc_tx_free(interface_out, tx_tag);
     dnoc_uc_free(interface_out, uc_tag);
-
-    printf("Done\n");
-
-    join();
 
     printf("Goodbye\n");
 

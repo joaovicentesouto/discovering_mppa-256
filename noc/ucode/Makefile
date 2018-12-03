@@ -19,4 +19,4 @@ cmd_1cluster_sendto_1io:
 
 clean:
 	rm -rf 1io_sendto_1cluster/output
-	rm -rf 1cluster_sendto_1io/output
+	# rm -rf 1cluster_sendto_1io/output
