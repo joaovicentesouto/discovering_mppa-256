@@ -19,7 +19,7 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
     int target_cluster = 128;
 
     int id = __k1_get_cluster_id();
-    int buffer_size = 28;
+    int buffer_size = 89;
     char buffer[buffer_size];
 
     printf("C#: Alloc and config Portals\n");

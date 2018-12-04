@@ -24,9 +24,9 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
     int target_tag = 7;
     int target_cluster = 0;
     
-    char buffer[] = "Parte1*Parte2*Parte3*Parte4\0";
+    char buffer[] = "Esta mensagem deve ser grande, ou seja, maior que 32 do payload... espero que funcione!\0";
 
-    printf("Alloc and config Portals\n");
+    printf("Alloc and config Portals, buffer size: %d\n", sizeof(buffer));
 
     cnoc_rx_alloc(interface, tag_in);
     cnoc_rx_config(interface, tag_in, MPPA_NOC_CNOC_RX_BARRIER, MASK);
@@ -56,9 +56,7 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
   	MPPA_NOC_DNOC_TX_CONFIG_INITIALIZER_DEFAULT(config_tx, 0);
 	config_tx ._.payload_max = 32; // for better performances
 
-    if (mppa_routing_get_dnoc_unicast_route(__k1_get_cluster_id(),
-						0, 
-						&config_tx, &header) != 0) {
+    if (mppa_routing_get_dnoc_unicast_route(id, target_cluster, &config_tx, &header) != 0) {
 	  printf("mppa_routing_get_dnoc_unicast_route failed\n");
 	  return -1;
 	}
@@ -71,8 +69,7 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 	mppa_noc_dnoc_uc_configuration_t uc_configuration;
 	memset(&uc_configuration, 0, sizeof(uc_configuration));
 
-	uc_configuration.program_start =  
-	  (uintptr_t) mppa_noc_linear_firmware_eot_event;
+	uc_configuration.program_start = (uintptr_t) mppa_noc_linear_firmware_eot_event;
 	uc_configuration.buffer_base = (uintptr_t) buffer;
 	uc_configuration.buffer_size = sizeof(buffer);
 
