@@ -113,6 +113,27 @@ unsigned dnoc_tx_alloc_auto(int interface)
     return tag;
 }
 
+//! UC NoC
+
+void dnoc_uc_alloc(int interface, int tag)
+{
+    assert(mppa_noc_dnoc_uc_alloc(interface, tag) == 0);
+}
+
+int dnoc_uc_alloc_auto(int interface)
+{
+    unsigned tag;
+    assert(mppa_noc_dnoc_uc_alloc_auto(interface, &tag, MPPA_NOC_BLOCKING) == 0);
+    
+    return tag;
+}
+
+void dnoc_uc_free(int interface, int tag)
+{
+    mppa_noc_dnoc_uc_free(interface, tag);
+}
+
+
 void dnoc_rx_config(int interface, int tag, char * buffer, int size, int offset)
 {
     mppa_noc_dnoc_rx_configuration_t config = {
@@ -150,8 +171,50 @@ void dnoc_tx_config(int interface, int tag, int source_cluster, int target_tag, 
 
     MPPA_NOC_DNOC_TX_CONFIG_INITIALIZER_DEFAULT(config, 0);
 
+    config._.payload_max = 32;
+
     assert(mppa_routing_get_dnoc_unicast_route(source_cluster, target_cluster, &config, &header) == 0);
     assert(mppa_noc_dnoc_tx_configure(interface, tag, header, config) == 0); //! == MPPA_NOC_RET_SUCCESS
+}
+
+void dnoc_tx_uc_config_and_write(int interface, int tx_tag, int uc_tag, int source_cluster, int target_tag, int target_cluster, void * buffer)
+{
+    mppa_dnoc_channel_config_t config = { 0 };
+    mppa_dnoc_header_t header = { 0 };
+    header._.valid = 1;
+    header._.tag = target_tag;
+
+    MPPA_NOC_DNOC_TX_CONFIG_INITIALIZER_DEFAULT(config, 0);
+
+    config._.payload_max = 32;
+
+    assert(mppa_routing_get_dnoc_unicast_route(source_cluster, target_cluster, &config, &header) == 0);
+    assert(mppa_noc_dnoc_tx_configure(interface, tx_tag, header, config) == 0); //! == MPPA_NOC_RET_SUCCESS
+
+    mppa_noc_dnoc_uc_configuration_t uc_configuration;
+	memset(&uc_configuration, 0, sizeof(uc_configuration));
+
+	uc_configuration.program_start = (uintptr_t) mppa_noc_linear_firmware_eot_event;
+	uc_configuration.buffer_base = (uintptr_t) buffer;
+	uc_configuration.buffer_size = sizeof(buffer);
+
+	mppa_noc_dnoc_uc_set_linear_params(&uc_configuration, sizeof(buffer), 0, 0);
+	
+    #ifdef _MASTER_
+    printf("IO: configure\n");
+	assert(mppa_noc_dnoc_uc_configure(interface, uc_tag, uc_configuration) == 0);
+    #else
+    assert(mppa_noc_dnoc_uc_configure(interface, uc_tag, uc_configuration, header, config) == 0);
+    assert(mppa_noc_dnoc_uc_link(interface, uc_tag, tx_tag, uc_configuration) == 0);
+    #endif
+
+    // Run the uc program
+	mppa_noc_uc_program_run_t program_run;
+	memset(&program_run, 0, sizeof(mppa_noc_uc_program_run_t));
+	program_run.semaphore = 1;
+	program_run.activation = 1;
+
+	mppa_noc_dnoc_uc_set_program_run(interface, uc_tag, program_run);
 }
 
 void dnoc_tx_write(int interface, int tag, char * buffer, int size, int offset)
@@ -168,24 +231,4 @@ void dnoc_tx_write(int interface, int tag, char * buffer, int size, int offset)
     mppa_noc_dnoc_tx_set_push_offset(interface, tag, off);
     mppa_noc_dnoc_tx_send_data(interface, tag, size, buffer);
     mppa_noc_dnoc_tx_flush_eot(interface, tag);
-}
-
-//! UC NoC
-
-void dnoc_uc_alloc(int interface, int tag)
-{
-    assert(mppa_noc_dnoc_uc_alloc(interface, tag) == 0);
-}
-
-int dnoc_uc_alloc_auto(int interface)
-{
-    unsigned tag;
-    assert(mppa_noc_dnoc_uc_alloc_auto(interface, &tag, MPPA_NOC_BLOCKING) == 0);
-    
-    return tag;
-}
-
-void dnoc_uc_free(int interface, int tag)
-{
-    mppa_noc_dnoc_uc_free(interface, tag);
 }

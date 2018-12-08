@@ -3,7 +3,7 @@
 #
 
 # Executable.
-EXEC = ucode_1io_to_1c_exec
+EXEC = ucode_1c_to_1io_exec
 
 # Use bare libraries
 system-name := bare

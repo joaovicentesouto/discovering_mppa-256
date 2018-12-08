@@ -38,9 +38,9 @@ extern void dnoc_tx_config(int, int, int, int, int);
 extern void dnoc_tx_write(int, int, char *, int, int);
 
 //! UC NoC
-
-void dnoc_uc_alloc(int, int);
-int dnoc_uc_alloc_auto(int);
-void dnoc_uc_free(int, int);
+extern void dnoc_tx_uc_config_and_write(int, int, int, int, int, int, void *);
+extern void dnoc_uc_alloc(int, int);
+extern int dnoc_uc_alloc_auto(int);
+extern void dnoc_uc_free(int, int);
 
 #endif /* SPAWN_H */

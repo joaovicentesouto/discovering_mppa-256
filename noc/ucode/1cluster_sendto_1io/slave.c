@@ -8,10 +8,7 @@
 #include <mppa_noc.h>
 #include <mppa_routing.h>
 
-#include <spawn.h>
 #include <noc.h>
-
-#define MASK ~0x1
 
 void func(int interface_out, int id, int target_tag, int target_cluster, int tx, int uc)
 {
@@ -58,7 +55,7 @@ void func(int interface_out, int id, int target_tag, int target_cluster, int tx,
 
 	mppa_noc_dnoc_uc_set_linear_params(&uc_configuration, sizeof(buffer), 0, 0);
 	
-	mppa_noc_dnoc_uc_configure(interface_out, uc_tag, uc_configuration);
+	mppa_noc_dnoc_uc_configure(interface_out, uc_tag, uc_configuration, header, config_tx);
 
 
     // Run the uc program
@@ -68,6 +65,10 @@ void func(int interface_out, int id, int target_tag, int target_cluster, int tx,
 	memset(&program_run, 0, sizeof(mppa_noc_uc_program_run_t));
 	program_run.semaphore = 1;
 	program_run.activation = 1;
+
+    if (mppa_noc_dnoc_uc_link(interface_out, uc_tag, tx_tag, uc_configuration) != 0)
+        printf("C#: DEU RUIM\n");
+
 
 	printf("C#: set microprogram\n");
 
@@ -90,45 +91,37 @@ void func(int interface_out, int id, int target_tag, int target_cluster, int tx,
     // dnoc_uc_free(interface_out, uc_tag);
 }
 
-void wait_(int interface_out, int uc_tag)
+void wait_(int interface_out, int tx_tag, int uc_tag)
 {
     printf("Done %u\n", mppa_noc_wait_clear_event(interface_out, MPPA_NOC_INTERRUPT_LINE_DNOC_TX, uc_tag));
+
+    if (mppa_noc_dnoc_uc_unlink(interface_out, uc_tag, tx_tag) != 0)
+        printf("C#: DEU RUIM\n");
 }
 
 int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **argv)
 {
-    printf("====== NoC Micro-code: 1 IO to 1 Cluster ======\n");
-    
-    int id = 128;
-    int interface = 0;
+    int id = 0;
     int interface_out = 0;
-    int tag_in = 7;
     int target_tag = 7;
-    int target_cluster = 0;
-    
-    char buffer[] = "Esta mensagem deve ser grande, ou seja, maior que 32 do payload... espero que funcione!\0";
+    int target_cluster = 128;
 
-    printf("Alloc and config Portals, buffer size: %d\n", sizeof(buffer));
+    // char buffer[] = "Esta mensagem deve ser grande, ou seja, maior que 32 do payload... espero que funcione!\0";
 
-    cnoc_rx_alloc(interface, tag_in);
-    cnoc_rx_config(interface, tag_in, MPPA_NOC_CNOC_RX_BARRIER, MASK);
+    // printf("C# Alloc and config Portals, buffer size: %d\n", sizeof(buffer));
     
-    //! ====================== UC Alloc ======================
+    // //! ====================== UC Alloc ======================
     int tx = dnoc_tx_alloc_auto(interface_out);
     int uc = dnoc_uc_alloc_auto(interface_out);
     uc = dnoc_uc_alloc_auto(interface_out);
     dnoc_uc_free(interface_out, 0);
-    //! ==================== UC END Alloc ====================
+    // //! ==================== UC END Alloc ====================
 
-    spawn();
+    // printf("C# Config %d\n", uc_tag);
 
-    printf("Wait signal\n");
+    // //! ====================== UC Config ======================
 
-    cnoc_rx_wait(interface, tag_in);
-
-    //! ====================== UC Config ======================
-
-    // Configure the TX (without mOS)
+    // // Configure the TX (without mOS)
 
 	// mppa_dnoc_channel_config_t config_tx = { 0 };
 	// mppa_dnoc_header_t header = { 0 };
@@ -144,7 +137,6 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 			      
 	// mppa_noc_dnoc_tx_configure(interface_out, tx_tag, header, config_tx);
 
-
     // // Configure the UC (without mOS)
 
 	// mppa_noc_dnoc_uc_configuration_t uc_configuration;
@@ -156,7 +148,7 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 
 	// mppa_noc_dnoc_uc_set_linear_params(&uc_configuration, sizeof(buffer), 0, 0);
 	
-	// mppa_noc_dnoc_uc_configure(interface_out, uc_tag, uc_configuration);
+	// mppa_noc_dnoc_uc_configure(interface_out, uc_tag, uc_configuration, header, config_tx);
 
 
     // // Run the uc program
@@ -166,22 +158,34 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 	// memset(&program_run, 0, sizeof(mppa_noc_uc_program_run_t));
 	// program_run.semaphore = 1;
 	// program_run.activation = 1;
+
+    // if (mppa_noc_dnoc_uc_link(interface_out, uc_tag, tx_tag, uc_configuration) != 0)
+    //     printf("C#: DEU RUIM\n");
+
+
+	// printf("C#: set microprogram\n");
+
 	// mppa_noc_dnoc_uc_set_program_run(interface_out, uc_tag, program_run);
 
-    // dnoc_tx_uc_config_and_write(interface_out, tx_tag, uc_tag, id, target_tag, target_cluster, buffer);
+    // // dnoc_tx_uc_config_and_write(interface_out, tx_tag, uc_tag, id, target_tag, target_cluster, buffer);
 
-	printf("IO: Sent data via microprogram\n");
+	// printf("C#: Sent data via microprogram\n");
 
-    //! ==================== UC END Config ====================
+    // //! ==================== UC END Config ====================
 
-    printf("Wait: send to cluster %d: %s\n", sizeof(buffer), buffer);
-
-    func(interface_out, id, target_tag, target_cluster, tx, uc);
-    wait_(interface_out, uc);
+    // printf("C# Wait: send to cluster %d: %s\n", sizeof(buffer), buffer);
 
     // printf("Done %u\n", mppa_noc_wait_clear_event(interface_out, MPPA_NOC_INTERRUPT_LINE_DNOC_TX, uc_tag));
 
-    join();
+    // if (mppa_noc_dnoc_uc_unlink(interface_out, uc_tag, tx_tag) != 0)
+    //     printf("C#: DEU RUIM\n");
+
+    // dnoc_tx_free(interface_out, tx_tag);
+    // dnoc_uc_free(interface_out, uc_tag);
+
+    // int tx = 0, uc = 0;
+    func(interface_out, id, target_tag, target_cluster, tx, uc);
+    wait_(interface_out, tx, uc);
 
     dnoc_tx_free(interface_out, tx);
     dnoc_uc_free(interface_out, uc);
@@ -189,4 +193,4 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
     printf("Goodbye\n");
 
 	return 0;
-};
+}
