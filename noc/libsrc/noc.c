@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <stdint.h>
 #include <mppa_noc.h>
 #include <mppa_routing.h>
@@ -133,7 +134,6 @@ void dnoc_uc_free(int interface, int tag)
     mppa_noc_dnoc_uc_free(interface, tag);
 }
 
-
 void dnoc_rx_config(int interface, int tag, char * buffer, int size, int offset)
 {
     mppa_noc_dnoc_rx_configuration_t config = {
@@ -143,7 +143,8 @@ void dnoc_rx_config(int interface, int tag, char * buffer, int size, int offset)
         .item_reload = 0,
         .item_counter = size,
         .event_counter = 0,
-//      .reload_mode = MPPA_NOC_RX_RELOAD_MODE_INCR_DATA_NOTIF,     //! Increment item and event counter
+        // .reload_mode = 0,     //! Increment item and event counter
+        // .reload_mode = MPPA_NOC_RX_RELOAD_MODE_DECR_NOTIF_NO_RELOAD,
         .reload_mode = MPPA_NOC_RX_RELOAD_MODE_DECR_DATA_NO_RELOAD, //! Decrement item, when 0 is reached, generate an event
         .activation = MPPA_NOC_ACTIVATED,
         .counter_id = 0
@@ -151,12 +152,16 @@ void dnoc_rx_config(int interface, int tag, char * buffer, int size, int offset)
 
     assert(mppa_noc_dnoc_rx_configure(interface, tag, config) == 0);
 
-    mppa_noc_dnoc_rx_lac_event_counter(interface, tag);
+    // mppa_noc_dnoc_rx_lac_event_counter(interface, tag);
 }
 
-void dnoc_rx_wait(int interface, int tag)
+void dnoc_rx_wait(int interface, int tag, int size)
 {
     mppa_noc_wait_clear_event(interface, MPPA_NOC_INTERRUPT_LINE_DNOC_RX, tag);
+
+    printf("ITEM: %d\n", mppa_noc_dnoc_rx_get_item_counter(interface, tag));
+    // assert( == size);
+    sleep(3);
 
     mppa_noc_dnoc_rx_lac_event_counter(interface, tag);
     mppa_noc_dnoc_rx_lac_item_counter(interface, tag);
@@ -230,5 +235,13 @@ void dnoc_tx_write(int interface, int tag, char * buffer, int size, int offset)
  
     mppa_noc_dnoc_tx_set_push_offset(interface, tag, off);
     mppa_noc_dnoc_tx_send_data(interface, tag, size, buffer);
+    // mppa_noc_dnoc_tx_send_data_eot(interface, tag, size, buffer);
+
+    // sleep(3);
+
     mppa_noc_dnoc_tx_flush_eot(interface, tag);
+
+    // sleep(3);
+
+    // mppa_noc_dnoc_tx_flush_eot(interface, tag);
 }

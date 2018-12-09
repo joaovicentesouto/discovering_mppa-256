@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
+#include <assert.h> 
 
 #include <mppa_power.h>
 #include <mppa_noc.h>
@@ -24,8 +25,10 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
 
     int id = __k1_get_cluster_id();
     int offset = id == 1 ? 0 : 1;
-    int buffer_size = id == 1 ? 4 : 7;
+    int buffer_size = id == 1 ? 128 : 256;
     char buffer[buffer_size];
+
+    memset(buffer, 0, buffer_size);
 
     printf("C#: Alloc and config Portals\n");
 
@@ -41,9 +44,13 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
     
     printf("Recive Msg\n");
     
-    dnoc_rx_wait(interface_in, tag_in);
+    dnoc_rx_wait(interface_in, tag_in, buffer_size);
     
-    printf("Msg: %s\n", buffer);
+    // printf("Msg: %s\n", buffer);
+    for(int i = 0; i < buffer_size; i++) {
+        // printf("i: 0x%x - %d\n", buffer[i], i);
+        assert(buffer[i] == 1);
+    }
 
     cnoc_tx_free(interface_out, tag_out);
     dnoc_rx_free(interface_in, tag_in);
