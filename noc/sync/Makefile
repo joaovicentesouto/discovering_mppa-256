@@ -5,7 +5,7 @@
 #
 
 # Builds all kernels.
-all: cmd_1io_wait_2clusters #cmd_2clusters_wait_1io
+all: cmd_2clusters_wait_1io #cmd_1io_wait_2clusters 
 
 # Builds sync kernel.
 cmd_1io_wait_2clusters:

@@ -9,7 +9,7 @@ export LIBSRCDIR = $(CURDIR)/libsrc
 export K1_TOOLCHAIN_DIR = /usr/local/k1tools
 
 # Builds all kernels.
-all: cmd_portal #cmd_ucode#cmd_sync # cmd_portal cmd_mailbox cmd_ucode cmd_handler
+all: cmd_handler#cmd_sync #cmd_ucode#cmd_sync # cmd_portal cmd_mailbox cmd_ucode cmd_handler
 
 # Builds sync kernel.
 cmd_sync:

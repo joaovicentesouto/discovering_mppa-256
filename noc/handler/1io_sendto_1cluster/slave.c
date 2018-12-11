@@ -60,8 +60,10 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
     cnoc_tx_write(interface_out, tag_out, 0x1);
     
     printf("Recive Msg\n");
+
+    while(1);
     
-    dnoc_rx_wait(interface_in, tag_in);
+    dnoc_rx_wait(interface_in, tag_in, 0);
     
     // printf("Msg: %s\n", buffer);
 

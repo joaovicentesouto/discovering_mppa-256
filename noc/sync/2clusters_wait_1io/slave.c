@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <mppa/osconfig.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include <mppa_power.h>
 #include <mppa_noc.h>
@@ -30,10 +31,13 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
     cnoc_tx_config(interface, tag_out, id, target_tag, target_cluster);
     cnoc_tx_write(interface, tag_out, id == 1 ? 0x1 : 0x2);
 
-    printf("Wait\n");
+    printf("Wait 5\n");
 
     uint64_t ret = cnoc_rx_read(interface, tag_in);
     printf("Ret %jx\n", ret);
+
+    sleep(5);
+
     cnoc_rx_wait(interface, tag_in);
 
     cnoc_rx_free(interface, tag_in);

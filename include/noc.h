@@ -32,7 +32,7 @@ extern void dnoc_tx_free(int, int);
 extern unsigned dnoc_tx_alloc_auto(int);
 
 extern void dnoc_rx_config(int, int, char *, int, int);
-extern void dnoc_rx_wait(int, int, int);
+extern unsigned dnoc_rx_wait(int, int, int);
 
 extern void dnoc_tx_config(int, int, int, int, int);
 extern void dnoc_tx_write(int, int, char *, int, int);
