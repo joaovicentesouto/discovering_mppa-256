@@ -2,45 +2,33 @@
 # Copyright(C) 2014 Pedro H. Penna <pedrohenriquepenna@gmail.com>
 #
 
-# Toolchain
-export CC = $(TOOLCHAIN)/bin/k1-gcc
-export LD = $(TOOLCHAIN)/bin/k1-ld
-export AR = $(TOOLCHAIN)/bin/k1-ar
+# Executable.
+EXEC = sync_1io_to_2c_exec
 
-# Toochain Location
-export TOOLCHAIN=/usr/local/k1tools
+# Use bare libraries
+system-name := bare
 
-# Toolchain Configuration
-export CFLAGS   = -std=c99 -fno-builtin # -ansi
-export CFLAGS  += -Wall -Wextra -Werror -Wa,--warn # -pedantic-errors
-export CFLAGS  += -Winit-self -Wswitch-default -Wfloat-equal
-export CFLAGS  += -Wundef -Wshadow -Wuninitialized -Wlogical-op
-export CFLAGS  += -Wvla # -Wredundant-decls
-export CFLAGS  += -I $(INCDIR)
+# Compilation flags.
+cflags := -fopenmp -O3 -std=gnu99 -g -mhypervisor -Wall -Wextra -Winit-self -Wswitch-default -Wfloat-equal -Wundef -Wshadow -Wuninitialized #Werror
+MPPAFlags := -g -lvbsp -lmppaipc -lutask -lgomp -lmppa_remote -lmppa_async -lmppa_request_engine -lmppapower -lmppanoc -lmpparouting -mhypervisor -Wl,--defsym=_LIBNOC_DISABLE_FIFO_FULL_CHECK=0
 
-# Compiler Options
-export CFLAGS += -D_KALRAY_MPPA256 -D_NOC_
+# Builds master binary.
+io-bin := master
+master-cflags := -D_MASTER_ -D_NOC_ -I $(INCDIR)
+master-lflags := $(MPPAFlags) -lpcie_queue 
+master-srcs := master.c $(wildcard $(LIBSRCDIR)/*.c)
 
-export CFLAGS_CC = $(CFLAGS) -D_MASTER_ -march=k1b -mos=bare -mcluster=node 
+# Builds slave binary.
+cluster-bin := slave
+cluster-system := $(cluster_system)
+cluster-cflags := -D_NOC_ -I $(INCDIR)
+cluster-lflags := $(MPPAFlags)
+slave-srcs := slave.c $(LIBSRCDIR)/noc.c
 
-export CFLAGS_IO = $(CFLAGS) -march=k1b -mos=bare -mcluster=ioddr 
+# Builds image (master + slave)
+mppa-bin := multibin_bin
+multibin_bin-objs := master slave
+multibin_bin-name := $(EXEC).img
 
-# Linker Options
-export LDFLAGS += -Wl,--defsym=_LIBNOC_DISABLE_FIFO_FULL_CHECK=0 #-O=essai
-
-export LDFLAGS_CC = $(LDFLAGS) -march=k1b -mos=bare -mcluster=node 
-
-export LDFLAGS_IO = $(LDFLAGS) -march=k1b -mos=bare -mcluster=ioddr
-
-LIBS = -lvbsp -lutask -lmppapower -lmppanoc -lmpparouting -mhypervisor
-
-
-# Builds All Object Files
-all:
-	$(CC) $(CFLAGS_IO) master.c $(wildcard $(LIBSRCDIR)/*.c) $(LDFLAGS_IO) -o master $(LIBS)
-	$(CC) $(CFLAGS_CC) slave.c $(LIBSRCDIR)/noc.c $(LDFLAGS_CC) -o slave $(LIBS) 
-	$(TOOLCHAIN)/bin/k1-create-multibinary -f --boot master --clusters slave -T sync_1io_to_2c_exec.img
-
-# Cleans All Object Files
-clean:
-	rm -rf master slave
+# must be at the end of the makefile!
+include $(K1_TOOLCHAIN_DIR)/share/make/Makefile.kalray

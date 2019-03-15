@@ -15,46 +15,46 @@
 
 #define MASK ~0x3F
 
-static pthread_mutex_t lock0 = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t lock1 = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t lock2 = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t lock3 = PTHREAD_MUTEX_INITIALIZER;
-
 int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **argv)
 {
     printf("====== NoC Sync: 1 IO wait 2 Clusters ======\n");
     
     int interface = 0;
     int tag = 16;
-
-    pthread_mutex_lock(&lock0);
-
-    printf(" ** LOCK 0 ** \n");
-    
-    pthread_mutex_lock(&lock1);
-    
-    printf(" ** LOCK 1 ** \n");
-
-    pthread_mutex_lock(&lock2);
-
-    printf(" ** LOCK 2 ** \n");
-
-    pthread_mutex_lock(&lock3);
     
     printf(" ** LOCK 3 ** \n");
 
-    cnoc_rx_alloc(interface, tag);
-    cnoc_rx_config(interface, tag, MPPA_NOC_CNOC_RX_BARRIER, MASK);
+    cnoc_rx_alloc(interface, tag+0);
+    cnoc_rx_alloc(interface, tag+1);
+    cnoc_rx_alloc(interface, tag+2);
+    cnoc_rx_alloc(interface, tag+3);
+    cnoc_rx_alloc(interface, tag+4);
+
+    cnoc_rx_config(interface, tag+0, MPPA_NOC_CNOC_RX_BARRIER, MASK);
+    cnoc_rx_config(interface, tag+1, MPPA_NOC_CNOC_RX_BARRIER, MASK);
+    cnoc_rx_config(interface, tag+2, MPPA_NOC_CNOC_RX_BARRIER, MASK);
+    cnoc_rx_config(interface, tag+3, MPPA_NOC_CNOC_RX_BARRIER, MASK);
+    cnoc_rx_config(interface, tag+4, MPPA_NOC_CNOC_RX_BARRIER, MASK);
 
     spawn();
 
-    printf("Wait\n");
+    printf("Wait 0\n");
+    cnoc_rx_wait(interface, tag+0);
+    printf("Wait 1\n");
+    cnoc_rx_wait(interface, tag+1);
+    printf("Wait 2\n");
+    cnoc_rx_wait(interface, tag+2);
+    printf("Wait 3\n");
+    cnoc_rx_wait(interface, tag+3);
+    printf("Wait 4\n");
+    cnoc_rx_wait(interface, tag+4);
+    printf("Finish\n");
 
-    cnoc_rx_wait(interface, tag);
-    
-    printf("Done\n");
-
-    cnoc_rx_free(interface, tag);
+    cnoc_rx_free(interface, tag+0);
+    cnoc_rx_free(interface, tag+1);
+    cnoc_rx_free(interface, tag+2);
+    cnoc_rx_free(interface, tag+3);
+    cnoc_rx_free(interface, tag+4);
 
     printf("Join\n");
 

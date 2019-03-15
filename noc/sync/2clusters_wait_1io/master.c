@@ -33,34 +33,75 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) const char **
 
     spawn();
 
-    printf("Wait 1\n");
+    printf("Wait\n");
 
     cnoc_rx_wait(interface_in, tag_in);
     cnoc_rx_free(interface_in, tag_in);
 
-    printf("Wait 2\n");
-    cnoc_tx_alloc(interface_out_1, tag_out_1);
+    printf("Alloc 1\n");
+    cnoc_tx_alloc(interface_out_1, tag_out_1+0);
+    cnoc_tx_alloc(interface_out_1, tag_out_1+1);
+    cnoc_tx_alloc(interface_out_1, tag_out_1+2);
+    cnoc_tx_alloc(interface_out_1, tag_out_1+3);
+    cnoc_tx_alloc(interface_out_1, tag_out_1+4);
 
-    printf("Wait 4\n");
-    cnoc_tx_alloc(interface_out_2, tag_out_2);
-    
-    printf("Send signal 1\n");
+    printf("Alloc 2\n");
+    cnoc_tx_alloc(interface_out_2, tag_out_2+0);
+    cnoc_tx_alloc(interface_out_2, tag_out_2+1);
+    cnoc_tx_alloc(interface_out_2, tag_out_2+2);
+    cnoc_tx_alloc(interface_out_2, tag_out_2+3); 
+    cnoc_tx_alloc(interface_out_2, tag_out_2+4);    
 
     target_cluster = 1;
-    cnoc_tx_config(interface_out_1, tag_out_1, 128, target_tag, target_cluster);
+    cnoc_tx_config(interface_out_1, tag_out_1+0, 128, target_tag+0, target_cluster);
+    cnoc_tx_config(interface_out_1, tag_out_1+1, 128, target_tag+1, target_cluster);
+    cnoc_tx_config(interface_out_1, tag_out_1+2, 128, target_tag+2, target_cluster);
+    cnoc_tx_config(interface_out_1, tag_out_1+3, 128, target_tag+3, target_cluster);
+    cnoc_tx_config(interface_out_1, tag_out_1+4, 128, target_tag+4, target_cluster);
+
+    printf("Send signal 0\n");
+    cnoc_tx_write(interface_out_1, tag_out_1+0, 0x1);
+    printf("Send signal 1\n");
+    cnoc_tx_write(interface_out_1, tag_out_1+1, 0x1);
     printf("Send signal 2\n");
-    cnoc_tx_write(interface_out_1, tag_out_1, 0x1);
+    cnoc_tx_write(interface_out_1, tag_out_1+2, 0x1);
+    printf("Send signal 3\n");
+    cnoc_tx_write(interface_out_1, tag_out_1+3, 0x1);
+    printf("Send signal 4\n");
+    cnoc_tx_write(interface_out_1, tag_out_1+4, 0x1);
 
     target_cluster = 2;
-    cnoc_tx_config(interface_out_2, tag_out_2, 129, target_tag, target_cluster);
-    cnoc_tx_write(interface_out_2, tag_out_2, 0x1);
+    cnoc_tx_config(interface_out_2, tag_out_2+0, 129, target_tag+0, target_cluster);
+    cnoc_tx_config(interface_out_2, tag_out_2+1, 129, target_tag+1, target_cluster);
+    cnoc_tx_config(interface_out_2, tag_out_2+2, 129, target_tag+2, target_cluster);
+    cnoc_tx_config(interface_out_2, tag_out_2+3, 129, target_tag+3, target_cluster);
+    cnoc_tx_config(interface_out_2, tag_out_2+4, 129, target_tag+4, target_cluster);
+
+    printf("-Send signal 0\n");
+    cnoc_tx_write(interface_out_2, tag_out_2+0, 0x1);
+    printf("-Send signal 1\n");
+    cnoc_tx_write(interface_out_2, tag_out_2+1, 0x1);
+    printf("-Send signal 2\n");
+    cnoc_tx_write(interface_out_2, tag_out_2+2, 0x1);
+    printf("-Send signal 3\n");
+    cnoc_tx_write(interface_out_2, tag_out_2+3, 0x1);
+    printf("-Send signal 4\n");
+    cnoc_tx_write(interface_out_2, tag_out_2+4, 0x1);
 
     printf("Join\n");
 
     join();
 
-    cnoc_tx_free(interface_out_1, tag_out_1);
-    cnoc_tx_free(interface_out_2, tag_out_2);
+    cnoc_tx_free(interface_out_1, tag_out_1+0);
+    cnoc_tx_free(interface_out_1, tag_out_1+1);
+    cnoc_tx_free(interface_out_1, tag_out_1+2);
+    cnoc_tx_free(interface_out_1, tag_out_1+3);
+    cnoc_tx_free(interface_out_1, tag_out_1+4);
+    cnoc_tx_free(interface_out_2, tag_out_2+0);
+    cnoc_tx_free(interface_out_2, tag_out_2+1);
+    cnoc_tx_free(interface_out_2, tag_out_2+2);
+    cnoc_tx_free(interface_out_2, tag_out_2+3);
+    cnoc_tx_free(interface_out_2, tag_out_2+4);
 
 
     printf("Goodbye\n");
