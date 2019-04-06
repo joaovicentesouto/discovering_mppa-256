@@ -5,12 +5,12 @@
 #
 
 # Builds all kernels.
-all: cmd_1io_sendto_2clusters # cmd_2clusters_sendto_1io
+all: cmd_1io_sendto_1cluster # cmd_2clusters_sendto_1io
 
 # Builds sync kernel.
-cmd_1io_sendto_2clusters:
-	cd 1io_sendto_2clusters && $(MAKE) all
-	cp 1io_sendto_2clusters/output/bin/*.img $(BINDIR)
+cmd_1io_sendto_1cluster:
+	cd 1io_sendto_1cluster && $(MAKE) all
+	cp 1io_sendto_1cluster/output/bin/*.img $(BINDIR)
 
 # Builds another sync kernel.
 cmd_2clusters_sendto_1io:

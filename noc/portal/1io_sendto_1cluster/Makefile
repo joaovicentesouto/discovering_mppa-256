@@ -3,7 +3,7 @@
 #
 
 # Executable.
-EXEC = portal_1io_to_2c_exec
+EXEC = portal_1io_to_1c_exec
 
 # Use bare libraries
 system-name := bare
@@ -14,7 +14,7 @@ MPPAFlags := -g -lvbsp -lmppaipc -lutask -lgomp -lmppa_remote -lmppa_async -lmpp
 
 # Builds master binary.
 io-bin := master
-master-cflags := -D_MASTER_ -D_NOC_ -I $(INCDIR)
+master-cflags := -D_MASTER_ -D_MAILBOX_ -D_NOC_ -I $(INCDIR)
 master-lflags := $(MPPAFlags) -lpcie_queue 
 master-srcs := master.c $(wildcard $(LIBSRCDIR)/*.c)
 

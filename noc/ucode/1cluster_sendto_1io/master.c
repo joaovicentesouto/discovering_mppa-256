@@ -32,7 +32,7 @@ int main(__attribute__((unused)) int argc,__attribute__((unused)) const char **a
     
     printf("Recive Msg\n");
     
-    dnoc_rx_wait(interface_in, tag_in);
+    dnoc_rx_wait(interface_in, tag_in, buffer_size);
     
     printf("Msg: %s\n", buffer);
 

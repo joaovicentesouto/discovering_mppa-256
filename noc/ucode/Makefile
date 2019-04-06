@@ -5,7 +5,7 @@
 #
 
 # Builds all kernels.
-all: cmd_1cluster_sendto_1io cmd_1io_sendto_1cluster # cmd_1cluster_sendto_1io
+all: cmd_1io_sendto_1cluster
 
 # Builds sync kernel.
 cmd_1io_sendto_1cluster:
