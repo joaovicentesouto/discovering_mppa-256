@@ -19,7 +19,7 @@ export CFLAGS  += -Wvla # -Wredundant-decls
 export CFLAGS  += -I $(INCDIR)
 
 # Compiler Options
-export CFLAGS += -D_KALRAY_MPPA256 -D_NOC_
+export CFLAGS += -D_KALRAY_MPPA256 -D_NOC_ -D_MAILBOX_
 
 export CFLAGS_CC = $(CFLAGS) -D_MASTER_ -march=k1b -mos=bare -mcluster=node 
 
@@ -39,7 +39,7 @@ LIBS = -lvbsp -lutask -lmppapower -lmppanoc -lmpparouting -mhypervisor
 all:
 	$(CC) $(CFLAGS_IO) master.c $(wildcard $(LIBSRCDIR)/*.c) $(LDFLAGS_IO) -o master $(LIBS)
 	$(CC) $(CFLAGS_CC) slave.c $(LIBSRCDIR)/noc.c $(LDFLAGS_CC) -o slave $(LIBS) 
-	$(TOOLCHAIN)/bin/k1-create-multibinary -f --boot master --clusters slave -T sync_1io_to_2c_exec.img
+	$(TOOLCHAIN)/bin/k1-create-multibinary -f --boot master --clusters slave -T 1io_wait_1cluster_exec.img
 
 # Cleans All Object Files
 clean:
