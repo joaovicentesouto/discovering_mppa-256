@@ -1,0 +1,16 @@
+Simple OS:
+
+To build:
+export K1_TOOLCHAIN_DIR=<toolchain>
+make
+
+To run on hardware:
+make hw_jtag_test 
+
+To run on simulator:
+make sim_test
+
+Simple OS is a multi-processor, multi-thread OS, preemptive OS. Its source code can be found in os/.
+A simple test that spawns 16 processors in a single cluster and creates 16 threads on each processor can be found in test/.
+
+Simple OS relies on the Kalray hypervisor and vbsp library. 
