@@ -38,8 +38,14 @@ image: test
 run-cc: $(MULTI_PREFIX)-node.mpk
 	$(K1_TOOLCHAIN_DIR)/bin/k1-jtag-runner --multibinary=$(MULTI_PREFIX)-node.mpk --exec-file=Cluster0:$(EXEC_PREFIX)-node
 
+run-cc-gdb: $(MULTI_PREFIX)-node.mpk
+	$(K1_TOOLCHAIN_DIR)/bin/k1-jtag-runner --gdb --multibinary=$(MULTI_PREFIX)-node.mpk --exec-file=Cluster0:$(EXEC_PREFIX)-node
+
 run-io: $(MULTI_PREFIX)-ioddr.mpk
 	$(K1_TOOLCHAIN_DIR)/bin/k1-jtag-runner --multibinary=$(MULTI_PREFIX)-ioddr.mpk --exec-file=IODDR0:$(EXEC_PREFIX)-ioddr
+
+run-io-gdb: $(MULTI_PREFIX)-ioddr.mpk
+	$(K1_TOOLCHAIN_DIR)/bin/k1-jtag-runner --gdb --multibinary=$(MULTI_PREFIX)-ioddr.mpk --exec-file=IODDR0:$(EXEC_PREFIX)-ioddr
 
 clean:
 	rm -rf $(EXEC_PREFIX)-node $(MULTI_PREFIX)-node.mpk
