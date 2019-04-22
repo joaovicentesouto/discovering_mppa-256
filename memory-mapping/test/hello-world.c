@@ -83,7 +83,20 @@ void k1b_tlb_init(void)
 	{
 		k1b_tlbe_read(&entry, K1B_JTLB_OFFSET + i);
 
-		printf("TLB %d : vaddr: 0x%08"PRIx32" => paddr: 0x%08"PRIx32"\n",
+		printf("JTLB %d: (0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x)\n",
+			i,
+			entry.page,
+			entry.size,
+			entry.global,
+			entry.addrspace,
+			entry.frame,
+			entry.addr_ext,
+			entry.protection,
+			entry.cache_policy,
+			entry.status
+		);
+
+		printf("JTLB %d : vaddr: 0x%08"PRIx32" => paddr: 0x%08"PRIx32"\n",
 			i,
 			k1b_tlbe_vaddr_get(&entry),
 			k1b_tlbe_paddr_get(&entry)
@@ -96,7 +109,20 @@ void k1b_tlb_init(void)
 	{
 		k1b_tlbe_read(&entry, K1B_LTLB_OFFSET + i);
 
-		printf("TLB %d : vaddr: 0x%08"PRIx32" => paddr: 0x%08"PRIx32"\n",
+		printf("LTLB %d: (0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x)\n",
+			i,
+			entry.page,
+			entry.size,
+			entry.global,
+			entry.addrspace,
+			entry.frame,
+			entry.addr_ext,
+			entry.protection,
+			entry.cache_policy,
+			entry.status
+		);
+
+		printf("LTLB %d : vaddr: 0x%08"PRIx32" => paddr: 0x%08"PRIx32"\n",
 			i,
 			k1b_tlbe_vaddr_get(&entry),
 			k1b_tlbe_paddr_get(&entry)
